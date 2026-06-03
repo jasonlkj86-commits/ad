@@ -269,7 +269,7 @@ def main():
         "roas":              round(ta / tc * 100, 1) if tc and ta else None,
     }
 
-    # 6) 타입별 소계
+    # 6) 타입별 소계 (한글명 키 사용)
     types = sorted(set(r["campaign_type"] for r in adgroup_rows))
     by_type = {}
     for t in types:

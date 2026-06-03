@@ -20,79 +20,88 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 /* ── 헤더 ── */
 header{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);gap:12px;flex-wrap:wrap}
 .logo{font-size:18px;font-weight:700}.logo span{color:var(--accent)}
-.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.controls label{color:var(--muted);font-size:12px}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .date-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer}
-.date-input::-webkit-calendar-picker-indicator{filter:invert(.6);cursor:pointer}
-.sep{color:var(--muted)}
-.btn-fetch{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s}
+.date-input::-webkit-calendar-picker-indicator{filter:invert(.6)}
+.sep{color:var(--muted);font-size:13px}
+.btn{border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s}
+.btn-fetch{background:var(--accent);color:#fff}
 .btn-fetch:hover{opacity:.85}.btn-fetch:disabled{opacity:.4;cursor:not-allowed}
-.status-badge{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
-.status-dot.loading{background:var(--yellow);animation:pulse 1s infinite}
-.status-dot.done{background:var(--green)}
+.status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.dot.loading{background:var(--yellow);animation:pulse 1s infinite}
+.dot.done{background:var(--green)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* ── 레이아웃 ── */
+/* ── 메인 ── */
 main{max-width:1400px;margin:0 auto;padding:28px;display:flex;flex-direction:column;gap:24px}
-.sec-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.sec-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
 
 /* ── 요약 카드 ── */
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
-.card.hi{border-color:var(--accent);background:linear-gradient(135deg,var(--surface) 60%,var(--accent-dim))}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+.card.hi{border-color:var(--accent);background:linear-gradient(135deg,var(--surface) 55%,var(--accent-dim))}
 .card-label{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:500}
-.card-value{font-size:22px;font-weight:700;letter-spacing:-.5px;line-height:1}
-.card-sub{font-size:11px;color:var(--muted);margin-top:5px}
-.roas-good{color:var(--green)}.roas-bad{color:var(--red)}
+.card-value{font-size:22px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+.card-sub{font-size:11px;color:var(--muted);margin-top:6px}
+.g{color:var(--green)}.r{color:var(--red)}
 
-/* ── 타입 탭 ── */
-.type-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-.type-tab{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
-.type-tab:hover{color:var(--text);border-color:var(--accent)}
-.type-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.type-tab .tab-cost{font-size:11px;opacity:.75;margin-left:4px}
+/* ── 캠페인 타입 탭 ── */
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:7px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--text);border-color:var(--accent)}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab.disabled{opacity:.45;cursor:default;position:relative}
+.tab-badge{font-size:10px;background:rgba(255,255,255,.15);border-radius:10px;padding:2px 7px}
+.tab-prep{font-size:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1px 6px;color:var(--muted)}
 
-/* ── 타입 소계 카드 ── */
-.type-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
-.type-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
-.type-card-label{font-size:11px;color:var(--muted);margin-bottom:6px}
-.type-card-value{font-size:18px;font-weight:700}
+/* ── 타입 소계 ── */
+.type-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:16px 0}
+.tsc{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.tsc-label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.tsc-value{font-size:17px;font-weight:700}
 
 /* ── 차트 ── */
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px}
 
 /* ── 테이블 ── */
-.table-wrap-outer{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-wrap:wrap;gap:10px}
-.table-search{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 12px;font-size:13px;font-family:inherit;width:200px}
-.table-search::placeholder{color:var(--muted)}
-.table-search:focus{outline:none;border-color:var(--accent)}
-.tbl-wrap{overflow-x:auto}
+.tbl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.tbl-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-wrap:wrap;gap:10px}
+.tbl-title{font-size:13px;font-weight:600;color:var(--muted)}
+.search{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 12px;font-size:13px;font-family:inherit;width:200px}
+.search::placeholder{color:var(--muted)}.search:focus{outline:none;border-color:var(--accent)}
+.tbl-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:12px}
-thead th{background:var(--surface2);color:var(--muted);font-weight:600;text-align:right;padding:9px 12px;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
+thead th{background:var(--surface2);color:var(--muted);font-weight:600;text-align:right;padding:9px 14px;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);font-size:11px}
 thead th:first-child,thead th:nth-child(2){text-align:left}
 thead th:hover{color:var(--text)}
 thead th.sorted{color:var(--accent)}
 tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:var(--surface2)}
-td{padding:10px 12px;text-align:right;vertical-align:middle}
+td{padding:10px 14px;text-align:right;vertical-align:middle}
 td:first-child,td:nth-child(2){text-align:left}
 td:first-child{color:var(--muted);font-size:11px}
 .roas-cell{font-weight:700}
-.roas-high{color:var(--green)}.roas-mid{color:var(--yellow)}.roas-low{color:var(--red)}
+.rh{color:var(--green)}.rm{color:var(--yellow)}.rl{color:var(--red)}
 .na{color:var(--muted);font-size:11px}
 
 /* ── 인사이트 ── */
 .insights{display:flex;flex-direction:column;gap:10px}
-.ins-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:10px;padding:13px 16px;display:flex;align-items:flex-start;gap:12px;font-size:13px;line-height:1.6}
-.ins-item.good{border-left-color:var(--green)}
-.ins-item.bad{border-left-color:var(--red)}
-.ins-item.warn{border-left-color:var(--yellow)}
-.ins-icon{font-size:15px;flex-shrink:0;margin-top:1px}
-.ins-text strong{color:var(--text);font-weight:600}
-.ins-text span{color:var(--muted)}
+.ins{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:10px;padding:13px 16px;display:flex;gap:12px;font-size:13px;line-height:1.6}
+.ins.good{border-left-color:var(--green)}.ins.bad{border-left-color:var(--red)}.ins.warn{border-left-color:var(--yellow)}
+.ins-icon{font-size:15px;flex-shrink:0;margin-top:2px}
+.ins strong{color:var(--text);font-weight:600}.ins span{color:var(--muted)}
+
+/* ── 준비중 안내 ── */
+.coming-soon{text-align:center;padding:60px 20px;color:var(--muted)}
+.coming-soon .cs-icon{font-size:40px;margin-bottom:16px;opacity:.3}
+.coming-soon h3{font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px}
+.coming-soon p{font-size:13px;line-height:1.7}
+
+/* ── 빈 화면 ── */
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .ei{font-size:36px;margin-bottom:12px;opacity:.4}
 
 @media(max-width:600px){header{padding:12px 16px}main{padding:14px}.card-value{font-size:18px}}
 </style>
@@ -101,14 +110,14 @@ td:first-child{color:var(--muted);font-size:11px}
 
 <header>
   <div class="logo">AD <span>성과분석</span></div>
-  <div class="controls">
-    <label>기간</label>
+  <div class="header-right">
+    <span class="sep">기간</span>
     <input type="date" id="date-from" class="date-input">
     <span class="sep">→</span>
     <input type="date" id="date-to" class="date-input">
-    <button class="btn-fetch" id="btn-fetch" onclick="triggerFetch()">조회하기</button>
-    <div class="status-badge" id="status-badge" style="display:none">
-      <div class="status-dot" id="status-dot"></div>
+    <button class="btn btn-fetch" id="btn-fetch" onclick="triggerFetch()">조회하기</button>
+    <div class="status" id="status" style="display:none">
+      <div class="dot" id="dot"></div>
       <span id="status-text"></span>
     </div>
   </div>
@@ -117,58 +126,64 @@ td:first-child{color:var(--muted);font-size:11px}
 <main>
 
   <!-- ① 전체 요약 -->
-  <div>
-    <div class="sec-title">전체 요약</div>
+  <div id="summary-wrap">
+    <div class="sec-label">기간 요약</div>
     <div class="cards" id="summary-cards">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">
-        <div style="font-size:32px;margin-bottom:12px;opacity:.4">📊</div>
+      <div class="empty" style="grid-column:1/-1;padding:40px">
+        <div class="ei">📊</div>
         <p>기간을 선택하고 조회하기를 눌러주세요</p>
       </div>
     </div>
   </div>
 
-  <!-- ② 일별 추이 차트 -->
-  <div class="chart-card" id="chart-section" style="display:none">
-    <div class="sec-title">일별 추이</div>
-    <div id="daily-chart"></div>
-  </div>
+  <!-- ② 캠페인 타입 탭 -->
+  <div id="type-wrap" style="display:none">
+    <div class="sec-label">캠페인 타입별 성과</div>
 
-  <!-- ③ 캠페인 타입별 탭 + 테이블 -->
-  <div id="type-section" style="display:none">
-    <div class="sec-title">캠페인 타입별 성과</div>
-    <div class="type-tabs" id="type-tabs"></div>
-    <div class="type-summary" id="type-summary-cards"></div>
-    <div class="table-wrap-outer">
-      <div class="table-header">
-        <span style="font-size:13px;font-weight:600;color:var(--muted)" id="table-title">광고그룹</span>
-        <input type="text" class="table-search" id="table-search" placeholder="광고그룹명 검색..." oninput="renderTable()">
-      </div>
-      <div class="tbl-wrap">
-        <table id="adgroup-table">
-          <thead>
-            <tr>
-              <th onclick="sortTable('campaign_name')">캠페인 <span>↕</span></th>
-              <th onclick="sortTable('adgroup_name')">광고그룹 <span>↕</span></th>
-              <th onclick="sortTable('cost')">광고비 <span>↕</span></th>
-              <th onclick="sortTable('clicks')">클릭수 <span>↕</span></th>
-              <th onclick="sortTable('ctr')">CTR <span>↕</span></th>
-              <th onclick="sortTable('cpc')">CPC <span>↕</span></th>
-              <th onclick="sortTable('conversions')">전환 <span>↕</span></th>
-              <th onclick="sortTable('conversion_amount')">전환액 <span>↕</span></th>
-              <th onclick="sortTable('roas')">ROAS <span>↕</span></th>
-              <th onclick="sortTable('cpa')">CPA <span>↕</span></th>
-            </tr>
-          </thead>
-          <tbody id="adgroup-tbody"></tbody>
-        </table>
+    <!-- 탭 -->
+    <div class="tabs" id="tabs"></div>
+
+    <!-- 타입 소계 카드 -->
+    <div class="type-sum" id="type-sum"></div>
+
+    <!-- 타입별 비교 차트 -->
+    <div class="chart-card" id="chart-wrap" style="margin-bottom:16px">
+      <div class="sec-label" style="margin-bottom:0">광고비 vs 전환액 비교</div>
+      <div id="type-chart"></div>
+    </div>
+
+    <!-- 광고그룹 테이블 / 준비중 -->
+    <div id="table-or-coming">
+      <div class="tbl-card" id="tbl-card">
+        <div class="tbl-head">
+          <span class="tbl-title" id="tbl-title">광고그룹</span>
+          <input type="text" class="search" id="search" placeholder="광고그룹명 검색..." oninput="renderTable()">
+        </div>
+        <div class="tbl-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sort('campaign_name')">캠페인 <span>↕</span></th>
+                <th onclick="sort('adgroup_name')">광고그룹 <span>↕</span></th>
+                <th onclick="sort('cost')">광고비 <span>↕</span></th>
+                <th onclick="sort('clicks')">클릭수 <span>↕</span></th>
+                <th onclick="sort('ctr')">CTR <span>↕</span></th>
+                <th onclick="sort('cpc')">CPC <span>↕</span></th>
+                <th onclick="sort('conversion_amount')">전환액 <span>↕</span></th>
+                <th onclick="sort('roas')">ROAS <span>↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ④ 인사이트 -->
-  <div id="insights-section" style="display:none">
-    <div class="sec-title">인사이트</div>
-    <div class="insights" id="insights-list"></div>
+  <!-- ③ 인사이트 -->
+  <div id="ins-wrap" style="display:none">
+    <div class="sec-label">인사이트</div>
+    <div class="insights" id="ins-list"></div>
   </div>
 
 </main>
@@ -176,19 +191,21 @@ td:first-child{color:var(--muted);font-size:11px}
 <script>
 const GITHUB_OWNER = 'jasonlkj86-commits';
 const GITHUB_REPO  = 'ad';
-const GITHUB_PAT   = localStorage.getItem('gh_pat') || '';
 
-let allAdGroups = [];
-let activeType  = '전체';
+let data = null;
+let activeTab = '전체';
 let sortKey = 'cost';
 let sortAsc = false;
 let chartInst = null;
 
+const TAB_ORDER = ['전체','파워링크','쇼핑검색','플레이스','디스플레이'];
+const DISPLAY_COMING = '디스플레이';  // 준비 중 탭
+
 // ── 초기화 ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const today = new Date();
-  const d30 = new Date(today); d30.setDate(d30.getDate() - 30);
-  document.getElementById('date-from').value = fmt(d30);
+  const d7 = new Date(today); d7.setDate(d7.getDate() - 7);
+  document.getElementById('date-from').value = fmt(d7);
   document.getElementById('date-to').value   = fmt(today);
   loadData();
 });
@@ -196,186 +213,169 @@ document.addEventListener('DOMContentLoaded', () => {
 function fmt(d){ return d.toISOString().slice(0,10); }
 
 function promptPAT(){
-  const p = prompt('GitHub Personal Access Token을 입력하세요.\n(repo 권한 필요 — 한 번만 입력하면 저장됩니다)');
-  if(p){ localStorage.setItem('gh_pat',p); location.reload(); }
+  const p = prompt('GitHub Personal Access Token을 입력하세요.\n(repo 권한 필요)');
+  if(p){ localStorage.setItem('gh_pat', p); location.reload(); }
 }
 
-// ── 조회 트리거 ──────────────────────────────────────────────────────────────
+// ── 조회 ────────────────────────────────────────────────────────────────────
 async function triggerFetch(){
   const pat = localStorage.getItem('gh_pat');
   if(!pat) return promptPAT();
   const df = document.getElementById('date-from').value;
   const dt = document.getElementById('date-to').value;
   if(!df||!dt){ alert('기간을 선택해주세요.'); return; }
-
-  setStatus('loading','Actions 실행 중...');
+  setStatus('loading','데이터 수집 중...');
   document.getElementById('btn-fetch').disabled = true;
   try{
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/fetch_stats.yml/dispatches`,
       { method:'POST',
-        headers:{ Authorization:`token ${pat}`, Accept:'application/vnd.github.v3+json', 'Content-Type':'application/json' },
+        headers:{ Authorization:`token ${pat}`, Accept:'application/vnd.github.v3+json','Content-Type':'application/json' },
         body: JSON.stringify({ ref:'main', inputs:{ date_from:df, date_to:dt } }) });
-    if(res.status===204){
-      setStatus('loading','데이터 수집 중... (30~60초 소요)');
-      pollData(0);
-    } else {
-      const e = await res.json().catch(()=>({}));
-      throw new Error(e.message||`HTTP ${res.status}`);
-    }
-  } catch(e){
-    setStatus('','');
-    document.getElementById('btn-fetch').disabled = false;
+    if(res.status===204){ pollData(0); }
+    else{ const e=await res.json().catch(()=>({})); throw new Error(e.message||`HTTP ${res.status}`); }
+  }catch(e){
+    setStatus('',''); document.getElementById('btn-fetch').disabled=false;
     alert('오류: '+e.message);
   }
 }
 
-async function pollData(attempt){
-  if(attempt>20){ setStatus('',''); document.getElementById('btn-fetch').disabled=false; alert('시간 초과. 잠시 후 새로고침해주세요.'); return; }
+async function pollData(n){
+  if(n>20){ setStatus('',''); document.getElementById('btn-fetch').disabled=false; alert('시간 초과. 새로고침해주세요.'); return; }
   await sleep(4000);
-  const data = await fetchJson();
-  const prev = document.getElementById('summary-cards').dataset.fetchedAt;
-  if(data && data.fetched_at && data.fetched_at !== prev){
-    renderAll(data);
-    setStatus('done',`${data.fetched_at.slice(0,16).replace('T',' ')} 조회됨`);
-    document.getElementById('btn-fetch').disabled = false;
-  } else { pollData(attempt+1); }
+  const d = await fetchJson();
+  const prev = document.getElementById('summary-cards').dataset.at;
+  if(d&&d.fetched_at&&d.fetched_at!==prev){
+    render(d); setStatus('done', d.fetched_at.slice(0,16).replace('T',' ')+' 조회됨');
+    document.getElementById('btn-fetch').disabled=false;
+  } else pollData(n+1);
 }
 
 async function loadData(){
-  const data = await fetchJson();
-  if(data && data.fetched_at){
-    renderAll(data);
-    setStatus('done',`${data.fetched_at.slice(0,16).replace('T',' ')} 조회됨`);
-  }
+  const d = await fetchJson();
+  if(d&&d.fetched_at){ render(d); setStatus('done', d.fetched_at.slice(0,16).replace('T',' ')+' 조회됨'); }
 }
 
 async function fetchJson(){
-  try{ const r = await fetch(`data/stats.json?t=${Date.now()}`); return r.ok ? r.json() : null; }
-  catch{ return null; }
+  try{ const r=await fetch('data/stats.json?t='+Date.now()); return r.ok?r.json():null; }catch{ return null; }
 }
 
 // ── 전체 렌더 ────────────────────────────────────────────────────────────────
-function renderAll(data){
-  document.getElementById('summary-cards').dataset.fetchedAt = data.fetched_at;
-  renderSummary(data.summary, data.date_from, data.date_to);
-  renderChart(data.daily);
-  allAdGroups = data.ad_groups || [];
-  renderTypeTabs(data.by_type || {});
-  renderInsights(data.summary, allAdGroups);
+function render(d){
+  data = d;
+  document.getElementById('summary-cards').dataset.at = d.fetched_at;
+  renderSummary(d.summary, d.date_from, d.date_to);
+  buildTabs(d.by_type||{});
+  document.getElementById('type-wrap').style.display = '';
+  renderTab();
+  renderInsights(d.summary, d.ad_groups||[]);
 }
 
 // ── 요약 카드 ─────────────────────────────────────────────────────────────────
 function renderSummary(s, df, dt){
-  const rc = s.roas == null ? '' : s.roas >= 300 ? 'roas-good' : s.roas < 100 ? 'roas-bad' : '';
+  const rc = s.roas==null?'':s.roas>=300?'g':s.roas<100?'r':'';
   document.getElementById('summary-cards').innerHTML = `
     <div class="card hi"><div class="card-label">총 광고비</div><div class="card-value">${wonFmt(s.cost)}</div><div class="card-sub">${df} ~ ${dt}</div></div>
-    <div class="card hi"><div class="card-label">전환액</div><div class="card-value">${s.conversion_amount ? wonFmt(s.conversion_amount) : '<span class="na">-</span>'}</div><div class="card-sub">${s.conversions}건 전환</div></div>
-    <div class="card hi"><div class="card-label">ROAS</div><div class="card-value ${rc}">${s.roas != null ? s.roas.toFixed(0)+'%' : '<span class="na" style="font-size:13px">-</span>'}</div><div class="card-sub">${s.roas!=null?(s.roas>=300?'✅ 우수':s.roas>=100?'보통':'⚠️ 주의'):''}</div></div>
+    <div class="card hi"><div class="card-label">전환액</div><div class="card-value">${s.conversion_amount?wonFmt(s.conversion_amount):'<span class="na">-</span>'}</div><div class="card-sub">전환 ${s.conversions}건</div></div>
+    <div class="card hi"><div class="card-label">ROAS</div>
+      <div class="card-value ${rc}">${s.roas!=null?s.roas.toFixed(0)+'%':'<span class="na" style="font-size:13px">-</span>'}</div>
+      <div class="card-sub">${s.roas!=null?(s.roas>=300?'✅ 우수':s.roas>=100?'보통':'⚠️ 주의'):''}</div></div>
     <div class="card"><div class="card-label">클릭수</div><div class="card-value">${numFmt(s.clicks)}</div><div class="card-sub">노출 ${numFmt(s.impressions)}</div></div>
     <div class="card"><div class="card-label">CTR</div><div class="card-value">${s.ctr.toFixed(2)}%</div><div class="card-sub">클릭률</div></div>
     <div class="card"><div class="card-label">평균 CPC</div><div class="card-value">${wonFmt(s.cpc)}</div><div class="card-sub">클릭당 비용</div></div>
   `;
 }
 
-// ── 차트 ──────────────────────────────────────────────────────────────────────
-function renderChart(daily){
-  if(!daily || !daily.length){ document.getElementById('chart-section').style.display='none'; return; }
-  document.getElementById('chart-section').style.display='';
-  const days  = ['일','월','화','수','목','금','토'];
-  const cats  = daily.map(d=>{ const dow=days[new Date(d.date).getDay()]; return d.date.slice(5)+' '+dow; });
-  const costs = daily.map(d=>d.cost);
-  const convA = daily.map(d=>d.conversion_amount);
-  const hasCv = convA.some(v=>v>0);
-  const series = [{name:'광고비',type:'bar',data:costs}];
-  if(hasCv) series.push({name:'전환액',type:'line',data:convA});
+// ── 탭 ──────────────────────────────────────────────────────────────────────
+function buildTabs(byType){
+  const existing = Object.keys(byType);
+  // TAB_ORDER 기준으로 정렬, 없는 탭도 표시
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = TAB_ORDER.map(t => {
+    const isComingSoon = (t === DISPLAY_COMING);
+    const hasData = (t === '전체') || existing.includes(t);
+    const cost = t==='전체'
+      ? (data?.ad_groups||[]).reduce((s,r)=>s+r.cost,0)
+      : (byType[t]?.cost||0);
+    if(isComingSoon){
+      return `<div class="tab disabled">${t} <span class="tab-prep">준비 중</span></div>`;
+    }
+    if(!hasData && t!=='전체') return '';
+    return `<button class="tab${t===activeTab?' active':''}" onclick="selectTab('${t}')">
+      ${t}${t!=='전체'?` <span class="tab-badge">${wonFmt(cost)}</span>`:''}
+    </button>`;
+  }).join('');
+}
+
+function selectTab(t){
+  if(t===DISPLAY_COMING) return;
+  activeTab = t;
+  buildTabs(data?.by_type||{});
+  renderTab();
+}
+
+function renderTab(){
+  if(activeTab===DISPLAY_COMING){
+    document.getElementById('tbl-card').style.display='none';
+    document.getElementById('type-sum').innerHTML='';
+    return;
+  }
+  document.getElementById('tbl-card').style.display='';
+  renderTypeSummary();
+  renderTypeChart();
+  renderTable();
+}
+
+// ── 타입 소계 ─────────────────────────────────────────────────────────────────
+function renderTypeSummary(){
+  const s = getActiveStats();
+  const rc = s.roas==null?'':s.roas>=300?'g':s.roas<100?'r':'';
+  document.getElementById('type-sum').innerHTML = `
+    <div class="tsc"><div class="tsc-label">광고비</div><div class="tsc-value">${wonFmt(s.cost)}</div></div>
+    <div class="tsc"><div class="tsc-label">클릭수</div><div class="tsc-value">${numFmt(s.clicks)}</div></div>
+    <div class="tsc"><div class="tsc-label">CTR</div><div class="tsc-value">${(s.ctr||0).toFixed(2)}%</div></div>
+    <div class="tsc"><div class="tsc-label">CPC</div><div class="tsc-value">${wonFmt(s.cpc)}</div></div>
+    <div class="tsc"><div class="tsc-label">전환액</div><div class="tsc-value">${wonFmt(s.conversion_amount)}</div></div>
+    <div class="tsc"><div class="tsc-label">ROAS</div><div class="tsc-value ${rc}">${s.roas!=null?s.roas.toFixed(0)+'%':'-'}</div></div>
+  `;
+}
+
+function getActiveStats(){
+  if(activeTab==='전체') return data?.summary||{};
+  return data?.by_type?.[activeTab]||{};
+}
+
+// ── 타입별 비교 차트 ──────────────────────────────────────────────────────────
+function renderTypeChart(){
+  const byType = data?.by_type||{};
+  const types = Object.keys(byType).filter(t=>t!==DISPLAY_COMING);
+  if(!types.length){ document.getElementById('chart-wrap').style.display='none'; return; }
+  document.getElementById('chart-wrap').style.display='';
+  const costs  = types.map(t=>byType[t].cost||0);
+  const convAs = types.map(t=>byType[t].conversion_amount||0);
   if(chartInst){ chartInst.destroy(); }
-  chartInst = new ApexCharts(document.getElementById('daily-chart'),{
-    series, chart:{height:300,background:'transparent',toolbar:{show:false},animations:{enabled:false}},
-    theme:{mode:'dark'}, colors:['#7c6af7','#34d399'],
-    stroke:{width:[0,3],curve:'smooth'}, fill:{opacity:[.85,1]},
+  chartInst = new ApexCharts(document.getElementById('type-chart'),{
+    series:[{name:'광고비',data:costs},{name:'전환액',data:convAs}],
+    chart:{type:'bar',height:220,background:'transparent',toolbar:{show:false},animations:{enabled:false}},
+    theme:{mode:'dark'},colors:['#7c6af7','#34d399'],
+    plotOptions:{bar:{horizontal:false,columnWidth:'50%',borderRadius:4}},
     dataLabels:{enabled:false},
-    xaxis:{categories:cats,labels:{rotate:-45,rotateAlways:true,style:{colors:'#7878a0',fontSize:'11px'}},axisBorder:{show:false},axisTicks:{show:false}},
-    yaxis: hasCv
-      ?[{labels:{formatter:v=>wonFmt(v),style:{colors:'#7878a0'}}},{opposite:true,labels:{formatter:v=>wonFmt(v),style:{colors:'#34d399'}}}]
-      :[{labels:{formatter:v=>wonFmt(v),style:{colors:'#7878a0'}}}],
+    xaxis:{categories:types,labels:{style:{colors:'#7878a0',fontSize:'12px'}},axisBorder:{show:false},axisTicks:{show:false}},
+    yaxis:{labels:{formatter:v=>wonFmt(v),style:{colors:'#7878a0'}}},
     grid:{borderColor:'#2e2e3e',strokeDashArray:3},
     tooltip:{theme:'dark',y:{formatter:v=>wonFmt(v)}},
-    plotOptions:{bar:{borderRadius:4,columnWidth:'60%'}},
     legend:{labels:{colors:'#e8e8f0'}},
   });
   chartInst.render();
 }
 
-// ── 타입 탭 ──────────────────────────────────────────────────────────────────
-function renderTypeTabs(byType){
-  document.getElementById('type-section').style.display='';
-  const types = ['전체', ...Object.keys(byType)];
-  const tabs = document.getElementById('type-tabs');
-
-  // 전체 비용 (탭 레이블용)
-  const totalCost = allAdGroups.reduce((s,r)=>s+r.cost, 0);
-  const typeCosts = {};
-  for(const [t, s] of Object.entries(byType)) typeCosts[t] = s.cost;
-
-  tabs.innerHTML = types.map(t => {
-    const cost = t==='전체' ? totalCost : (typeCosts[t]||0);
-    return `<button class="type-tab${t===activeType?' active':''}" onclick="selectType('${t}')">${t} <span class="tab-cost">${cmpWon(cost)}</span></button>`;
-  }).join('');
-
-  renderTypeSummary(byType);
-  renderTable();
-}
-
-function selectType(t){
-  activeType = t;
-  document.querySelectorAll('.type-tab').forEach(el=>{
-    el.classList.toggle('active', el.textContent.startsWith(t));
-  });
-  const byType = JSON.parse(document.getElementById('type-tabs').dataset.byType||'{}');
-  renderTypeSummary(byType);
-  renderTable();
-}
-
-function renderTypeSummary(byType){
-  // byType을 탭에 저장
-  document.getElementById('type-tabs').dataset.byType = JSON.stringify(byType);
-
-  let s;
-  if(activeType === '전체'){
-    const rows = allAdGroups;
-    const tc = rows.reduce((a,r)=>a+r.cost,0);
-    const ti = rows.reduce((a,r)=>a+r.impressions,0);
-    const tk = rows.reduce((a,r)=>a+r.clicks,0);
-    const tv = rows.reduce((a,r)=>a+r.conversions,0);
-    const ta = rows.reduce((a,r)=>a+r.conversion_amount,0);
-    s = { cost:tc, impressions:ti, clicks:tk, conversions:tv, conversion_amount:ta,
-          ctr: ti?+(tk/ti*100).toFixed(2):0, cpc: tk?Math.round(tc/tk):0,
-          roas: tc&&ta?+(ta/tc*100).toFixed(1):null };
-  } else {
-    s = byType[activeType] || {};
-  }
-
-  const rc = s.roas==null?'':s.roas>=300?'roas-good':s.roas<100?'roas-bad':'';
-  document.getElementById('type-summary-cards').innerHTML = `
-    <div class="type-card"><div class="type-card-label">광고비</div><div class="type-card-value">${wonFmt(s.cost||0)}</div></div>
-    <div class="type-card"><div class="type-card-label">클릭수</div><div class="type-card-value">${numFmt(s.clicks||0)}</div></div>
-    <div class="type-card"><div class="type-card-label">CTR</div><div class="type-card-value">${(s.ctr||0).toFixed(2)}%</div></div>
-    <div class="type-card"><div class="type-card-label">CPC</div><div class="type-card-value">${wonFmt(s.cpc||0)}</div></div>
-    <div class="type-card"><div class="type-card-label">전환수</div><div class="type-card-value">${numFmt(s.conversions||0)}</div></div>
-    <div class="type-card"><div class="type-card-label">전환액</div><div class="type-card-value">${wonFmt(s.conversion_amount||0)}</div></div>
-    <div class="type-card"><div class="type-card-label">ROAS</div><div class="type-card-value ${rc}">${s.roas!=null?s.roas.toFixed(0)+'%':'-'}</div></div>
-  `;
-}
-
 // ── 테이블 ────────────────────────────────────────────────────────────────────
 function renderTable(){
-  const q = document.getElementById('table-search').value.toLowerCase();
-  let rows = activeType==='전체'
-    ? allAdGroups
-    : allAdGroups.filter(r=>r.campaign_type===activeType);
-  if(q) rows = rows.filter(r=>
-    r.adgroup_name.toLowerCase().includes(q) || r.campaign_name.toLowerCase().includes(q));
+  const q = document.getElementById('search').value.toLowerCase();
+  let rows = activeTab==='전체'
+    ? (data?.ad_groups||[])
+    : (data?.ad_groups||[]).filter(r=>r.campaign_type===activeTab);
+  if(q) rows = rows.filter(r=>r.adgroup_name.toLowerCase().includes(q)||r.campaign_name.toLowerCase().includes(q));
   rows.sort((a,b)=>{
     const av=a[sortKey]??-1, bv=b[sortKey]??-1;
     if(typeof av==='string') return sortAsc?av.localeCompare(bv):bv.localeCompare(av);
@@ -383,69 +383,78 @@ function renderTable(){
   });
   document.querySelectorAll('thead th').forEach(th=>{
     const m=th.getAttribute('onclick')?.match(/'(\w+)'/);
-    th.classList.toggle('sorted', m&&m[1]===sortKey);
+    th.classList.toggle('sorted', !!(m&&m[1]===sortKey));
   });
-  document.getElementById('table-title').textContent = activeType==='전체'?`전체 (${rows.length}개)`:`${activeType} (${rows.length}개)`;
-  const tbody = document.getElementById('adgroup-tbody');
-  if(!rows.length){ tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">결과 없음</td></tr>`; return; }
+  document.getElementById('tbl-title').textContent = `${activeTab==='전체'?'전체':activeTab} 광고그룹 (${rows.length}개)`;
+  const tbody = document.getElementById('tbody');
+  if(!rows.length){ tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">결과 없음</td></tr>`; return; }
   tbody.innerHTML = rows.map(r=>{
-    const rc = r.roas==null?'':r.roas>=300?'roas-high':r.roas>=100?'roas-mid':'roas-low';
-    const cname = r.campaign_name.replace(/\[(.*?)\]\s*/,'');
+    const rc = r.roas==null?'':r.roas>=300?'rh':r.roas>=100?'rm':'rl';
     return `<tr>
       <td>${r.campaign_name}</td>
       <td>${r.adgroup_name}</td>
-      <td>${cmpWon(r.cost)}</td>
+      <td>${wonFmt(r.cost)}</td>
       <td>${numFmt(r.clicks)}</td>
       <td>${r.ctr.toFixed(2)}%</td>
       <td>${wonFmt(r.cpc)}</td>
-      <td>${numFmt(r.conversions)||'<span class="na">-</span>'}</td>
-      <td>${r.conversion_amount?cmpWon(r.conversion_amount):'<span class="na">-</span>'}</td>
+      <td>${r.conversion_amount?wonFmt(r.conversion_amount):'<span class="na">-</span>'}</td>
       <td class="roas-cell ${rc}">${r.roas!=null?r.roas.toFixed(0)+'%':'<span class="na">-</span>'}</td>
-      <td>${r.cpa!=null?wonFmt(r.cpa):'<span class="na">-</span>'}</td>
     </tr>`;
   }).join('');
 }
 
-function sortTable(key){ if(sortKey===key){sortAsc=!sortAsc;}else{sortKey=key;sortAsc=false;} renderTable(); }
+function sort(k){ sortKey===k?(sortAsc=!sortAsc):(sortKey=k,sortAsc=false); renderTable(); }
 
 // ── 인사이트 ──────────────────────────────────────────────────────────────────
-function renderInsights(summary, rows){
-  const items = [];
-  if(!rows.length){ document.getElementById('insights-section').style.display='none'; return; }
-  const totalCost = rows.reduce((s,r)=>s+r.cost,0);
-  if(summary.roas!=null){
-    if(summary.roas>=300) items.push({type:'good',icon:'✅',text:`전체 ROAS <strong>${summary.roas.toFixed(0)}%</strong> — 광고비 대비 전환이 양호합니다.`});
-    else if(summary.roas<100) items.push({type:'bad',icon:'🔴',text:`전체 ROAS <strong>${summary.roas.toFixed(0)}%</strong> — 광고비보다 전환액이 낮습니다.`});
+function renderInsights(s, rows){
+  const items=[];
+  if(!rows.length){ document.getElementById('ins-wrap').style.display='none'; return; }
+  const tc = rows.reduce((a,r)=>a+r.cost,0);
+
+  if(s.roas!=null){
+    if(s.roas>=300) items.push({t:'good',i:'✅',txt:`전체 ROAS <strong>${s.roas.toFixed(0)}%</strong> — 광고비 대비 전환이 우수합니다.`});
+    else if(s.roas<100) items.push({t:'bad',i:'🔴',txt:`전체 ROAS <strong>${s.roas.toFixed(0)}%</strong> — 광고비보다 전환액이 낮습니다. 전반적인 점검이 필요합니다.`});
   }
+
   const withRoas = rows.filter(r=>r.roas!=null&&r.cost>0);
   if(withRoas.length){
     const best  = [...withRoas].sort((a,b)=>b.roas-a.roas)[0];
     const worst = [...withRoas].sort((a,b)=>a.roas-b.roas)[0];
-    if(best.roas>=200) items.push({type:'good',icon:'🟢',text:`ROAS 최고: <strong>${best.campaign_name} › ${best.adgroup_name}</strong> (${best.roas.toFixed(0)}%) — 예산 증액 검토`});
-    if(worst.roas<100&&worst.cost>totalCost*0.05) items.push({type:'bad',icon:'🔴',text:`ROAS 최저: <strong>${worst.campaign_name} › ${worst.adgroup_name}</strong> (${worst.roas.toFixed(0)}%) — 입찰가 조정 또는 일시 중지 검토`});
+    if(best.roas>=200) items.push({t:'good',i:'🟢',txt:`ROAS 최고: <strong>${best.campaign_name} › ${best.adgroup_name}</strong> (${best.roas.toFixed(0)}%) — 예산 증액 검토`});
+    if(worst.roas<100&&worst.cost>tc*0.05) items.push({t:'bad',i:'🔴',txt:`ROAS 최저: <strong>${worst.campaign_name} › ${worst.adgroup_name}</strong> (${worst.roas.toFixed(0)}%) — 입찰가 낮추거나 일시 중지 검토`});
   }
+
   const noClick = rows.filter(r=>r.cost>0&&r.clicks===0);
-  if(noClick.length) items.push({type:'warn',icon:'⚠️',text:`클릭 없이 비용 발생: <strong>${noClick.slice(0,3).map(r=>r.adgroup_name).join(', ')}</strong> 등 ${noClick.length}개 광고그룹`});
-  const hcnc = rows.filter(r=>r.conversions===0&&r.cost>totalCost*0.1);
-  if(hcnc.length) items.push({type:'bad',icon:'📉',text:`광고비 상위인데 전환 0건: <strong>${hcnc.map(r=>r.adgroup_name).join(', ')}</strong>`});
-  if(!items.length) items.push({type:'',icon:'ℹ️',text:`<span>데이터가 충분히 쌓이면 인사이트가 자동 표시됩니다.</span>`});
-  document.getElementById('insights-list').innerHTML = items.map(i=>`
-    <div class="ins-item ${i.type}"><span class="ins-icon">${i.icon}</span><div class="ins-text">${i.text}</div></div>`).join('');
-  document.getElementById('insights-section').style.display='';
+  if(noClick.length) items.push({t:'warn',i:'⚠️',txt:`클릭 없이 비용 발생 <strong>${noClick.length}개</strong> — ${noClick.slice(0,3).map(r=>r.adgroup_name).join(', ')} 등`});
+
+  const hcnc = rows.filter(r=>r.conversion_amount===0&&r.cost>tc*0.1);
+  if(hcnc.length) items.push({t:'bad',i:'📉',txt:`광고비 상위인데 전환 0원: <strong>${hcnc.map(r=>r.adgroup_name).join(', ')}</strong> — 랜딩페이지 또는 키워드 점검`});
+
+  if(!items.length) items.push({t:'',i:'ℹ️',txt:`<span>기간을 늘려 데이터가 충분히 쌓이면 인사이트가 자동 표시됩니다.</span>`});
+
+  document.getElementById('ins-list').innerHTML = items.map(x=>`
+    <div class="ins ${x.t}"><span class="ins-icon">${x.i}</span><div>${x.txt}</div></div>`).join('');
+  document.getElementById('ins-wrap').style.display='';
 }
 
-// ── 상태 표시 ────────────────────────────────────────────────────────────────
-function setStatus(state,text){
-  const b=document.getElementById('status-badge');
-  if(!text){b.style.display='none';return;}
-  b.style.display='flex';
-  document.getElementById('status-dot').className='status-dot '+state;
-  document.getElementById('status-text').textContent=text;
+// ── 상태 ─────────────────────────────────────────────────────────────────────
+function setStatus(s,t){
+  const el=document.getElementById('status');
+  if(!t){el.style.display='none';return;}
+  el.style.display='flex';
+  document.getElementById('dot').className='dot '+s;
+  document.getElementById('status-text').textContent=t;
 }
 
-// ── 포맷 ─────────────────────────────────────────────────────────────────────
-function wonFmt(v){ if(!v)return '0원'; if(v>=1000000)return (v/1000000).toFixed(1)+'백만원'; return v.toLocaleString('ko-KR')+'원'; }
-function cmpWon(v){ if(!v)return '0원'; if(v>=1000000)return (v/1000000).toFixed(1)+'M'; if(v>=10000)return Math.round(v/1000)+'K'; return v.toLocaleString('ko-KR')+'원'; }
+// ── 숫자 포맷 (원 단위) ────────────────────────────────────────────────────────
+function wonFmt(v){
+  if(!v&&v!==0) return '-';
+  v = Math.round(v);
+  if(v===0) return '0원';
+  if(v>=100000000) return (v/100000000).toFixed(1)+'억원';
+  if(v>=1000000)   return (v/1000000).toFixed(1)+'백만원';
+  return v.toLocaleString('ko-KR')+'원';
+}
 function numFmt(v){ return (v??0).toLocaleString('ko-KR'); }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 </script>
