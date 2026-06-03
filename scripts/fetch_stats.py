@@ -150,10 +150,9 @@ def main():
 
     # 1) 캠페인 목록
     campaigns = get_campaigns(customer_id, access_license, secret_key)
-    print(f"캠페인 {len(campaigns)}개")
-    # 첫 캠페인 구조 출력 (필드명 확인용)
-    if campaigns:
-        print(f"  [캠페인 샘플 키] {list(campaigns[0].keys())}")
+    print(f"캠페인 총 {len(campaigns)}개")
+    for c in campaigns:
+        print(f"  캠페인: {c.get('name','?')} | 타입: {c.get('campaignTp','?')} | ID: {c.get('nccCampaignId','?')}")
 
     # 2) 유효 필드 한 번만 확인
     print("사용 가능한 통계 필드 확인 중...")
