@@ -73,7 +73,7 @@ def get_ad_groups(cid, lic, sec, campaign_id):
 
 
 # ── 통계 공통 파라미터 ────────────────────────────────────────────────────────
-STAT_FIELDS = "clkCnt,impCnt,salesAmt,ctr,avgCpc,rvImpCnt,convAmt"
+STAT_FIELDS = json.dumps(["clkCnt","impCnt","salesAmt","ctr","avgCpc","rvImpCnt","convAmt"])
 
 
 def get_stats(cid, lic, sec, ids: list, time_unit: str,
