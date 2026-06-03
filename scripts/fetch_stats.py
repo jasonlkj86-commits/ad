@@ -87,8 +87,8 @@ def get_stats(cid, lic, sec, ids: list, time_unit: str,
             "ids": ",".join(chunk) if chunk else ids[0],
             "fields": STAT_FIELDS,
             "timeUnit": time_unit,
-            "dateFrom": date_from,
-            "dateTo": date_to,
+            "timeRange": json.dumps({"since": date_from, "until": date_to},
+                                    separators=(",", ":")),
         }
         resp = api_get(cid, lic, sec, "/stats", params)
         rows = resp if isinstance(resp, list) else resp.get("data", [])
