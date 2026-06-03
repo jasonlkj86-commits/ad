@@ -37,19 +37,9 @@ def _headers(customer_id, access_license, secret_key, path):
 
 
 # ── HTTP GET ─────────────────────────────────────────────────────────────────
-def _build_qs(params: dict) -> str:
-    """JSON 값(fields, timeRange)의 []{}," 문자는 인코딩하지 않음"""
-    parts = []
-    for k, v in params.items():
-        ek = urllib.parse.quote(str(k), safe="")
-        ev = urllib.parse.quote(str(v), safe='[]{}:,"')
-        parts.append(f"{ek}={ev}")
-    return "&".join(parts)
-
-
 def api_get(cid, lic, sec, path, params: dict = None):
     """params dict → query string (서명은 path만으로 계산)"""
-    qs  = ("?" + _build_qs(params)) if params else ""
+    qs  = ("?" + urllib.parse.urlencode(params)) if params else ""
     url = BASE_URL + path + qs
     req = urllib.request.Request(url, headers=_headers(cid, lic, sec, path))
     try:
@@ -66,11 +56,14 @@ def api_get(cid, lic, sec, path, params: dict = None):
 # ── 통계: 단일 ID, 단일 호출 ──────────────────────────────────────────────────
 def get_stat_one(cid, lic, sec, obj_id: str, time_unit: str, date_from: str, date_to: str):
     """ID 하나에 대한 통계 반환"""
+    # 네이버 API는 날짜를 YYYYMMDD 형식(대시 없음)으로 받음
+    since = date_from.replace("-", "")
+    until = date_to.replace("-", "")
     params = {
         "ids":       obj_id,
         "fields":    FIELDS,
         "timeUnit":  time_unit,
-        "timeRange": json.dumps({"since": date_from, "until": date_to}, separators=(",", ":")),
+        "timeRange": json.dumps({"since": since, "until": until}, separators=(",", ":")),
     }
     resp = api_get(cid, lic, sec, "/stats", params)
     return resp if isinstance(resp, list) else resp.get("data", [])
