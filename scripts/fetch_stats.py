@@ -106,10 +106,13 @@ def get_adgroups(cid, lic, sec, campaign_id):
 def aggregate_daily(rows):
     by_date = {}
     for row in rows:
-        d = (row.get("datetime") or row.get("date") or "")[:10]
-        if not d:
+        # API 응답이 flat 구조 → datetime / date / regTm 순으로 시도
+        raw_d = (row.get("datetime") or row.get("date") or
+                 row.get("regTm") or "")
+        d = str(raw_d)[:10].replace(".", "-")  # YYYYMMDD → YYYY-MM-DD 변환
+        if len(d) < 10 or not d[:4].isdigit():
             continue
-        s = row.get("stat") or row
+        s = row.get("stat") or row  # flat or nested 모두 처리
         e = by_date.setdefault(d, {"date": d, "cost": 0, "impressions": 0,
                                    "clicks": 0, "conversions": 0, "conversion_amount": 0})
         e["cost"]              += _int(s.get("salesAmt"))
@@ -167,11 +170,8 @@ def main():
                             cid_val, "date", date_from, date_to, active_fields)
         all_daily_rows.extend(rows)
         print(f"  캠페인 {cid_val}: {len(rows)}행")
-        # 첫 캠페인 첫 행 구조 출력
         if rows and cid_val == campaigns[0]["nccCampaignId"]:
-            print(f"  [일별 샘플 키] {list(rows[0].keys())}")
-            if rows[0]:
-                print(f"  [일별 샘플] {json.dumps(rows[0], ensure_ascii=False)[:200]}")
+            print(f"  [일별 첫행] {json.dumps(rows[0], ensure_ascii=False)[:300]}")
 
     daily_totals = aggregate_daily(all_daily_rows)
     print(f"  → 일별 합산 {len(daily_totals)}일")
@@ -182,7 +182,7 @@ def main():
 
     for c in campaigns:
         cid_val = c["nccCampaignId"]
-        cname   = c.get("campaignName", cid_val)
+        cname   = c.get("name", cid_val)   # API 필드명은 'name'
         adgroups = get_adgroups(customer_id, access_license, secret_key, cid_val)
         if not adgroups:
             continue
@@ -190,7 +190,7 @@ def main():
 
         for ag in adgroups:
             agid   = ag["nccAdgroupId"]
-            agname = ag.get("adgroupName", agid)
+            agname = ag.get("name", ag.get("adgroupName", agid))  # API 필드명은 'name'
             rows   = get_stat_one(customer_id, access_license, secret_key,
                                   agid, "total", date_from, date_to, active_fields)
             s = {}
