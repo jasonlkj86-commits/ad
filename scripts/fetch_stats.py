@@ -38,7 +38,8 @@ def api_get(customer_id, access_license, secret_key, path, params=None):
     qs = ("?" + urllib.parse.urlencode(params)) if params else ""
     full_path = path + qs
     url = BASE_URL + full_path
-    headers = _headers(customer_id, access_license, secret_key, "GET", full_path)
+    # 서명은 쿼리스트링 제외한 path 만으로 계산
+    headers = _headers(customer_id, access_license, secret_key, "GET", path)
     req = urllib.request.Request(url, headers=headers, method="GET")
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
