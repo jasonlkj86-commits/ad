@@ -37,9 +37,19 @@ def _headers(customer_id, access_license, secret_key, path):
 
 
 # ── HTTP GET ─────────────────────────────────────────────────────────────────
+def _build_qs(params: dict) -> str:
+    """JSON 값(fields, timeRange)의 []{}," 문자는 인코딩하지 않음"""
+    parts = []
+    for k, v in params.items():
+        ek = urllib.parse.quote(str(k), safe="")
+        ev = urllib.parse.quote(str(v), safe='[]{}:,"')
+        parts.append(f"{ek}={ev}")
+    return "&".join(parts)
+
+
 def api_get(cid, lic, sec, path, params: dict = None):
     """params dict → query string (서명은 path만으로 계산)"""
-    qs  = ("?" + urllib.parse.urlencode(params)) if params else ""
+    qs  = ("?" + _build_qs(params)) if params else ""
     url = BASE_URL + path + qs
     req = urllib.request.Request(url, headers=_headers(cid, lic, sec, path))
     try:
