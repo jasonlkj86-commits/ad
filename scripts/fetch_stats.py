@@ -13,10 +13,22 @@ from datetime import datetime, timedelta, timezone
 BASE_URL = "https://api.naver.com"
 KST = timezone(timedelta(hours=9))
 
-# ctr, avgCpc, rvImpCnt는 API 미지원 → Python 계산 또는 제외
-# convAmt는 계정 설정에 따라 지원 여부 다름 → 런타임에 확인
-BASE_FIELDS  = ["clkCnt", "impCnt", "salesAmt"]
-EXTRA_FIELDS = ["convAmt"]          # 전환매출액 (계정 설정에 따라 가능)
+# 캠페인 타입 한글 매핑
+TYPE_MAP = {
+    "POWERLINK":       "파워링크",
+    "POWER_LINK":      "파워링크",
+    "SHOPPING":        "쇼핑검색",
+    "SHOPPING_SEARCH": "쇼핑검색",
+    "PLACE_SEARCH":    "플레이스",
+    "PLACE":           "플레이스",
+    "BRAND_SEARCH":    "브랜드검색",
+    "BRAND":           "브랜드검색",
+    "DISPLAY":         "디스플레이",
+}
+
+# 기본 필드 (probe로 확장)
+BASE_FIELDS = ["clkCnt", "impCnt", "salesAmt"]
+OPTIONAL_FIELDS = ["convAmt", "rvImpCnt", "orderCnt", "convCnt"]
 
 
 # ── 서명 ──────────────────────────────────────────────────────────────────────
@@ -38,31 +50,27 @@ def _headers(customer_id, access_license, secret_key, path):
     }
 
 
-# ── HTTP GET ─────────────────────────────────────────────────────────────────
 def api_get(cid, lic, sec, path, params: dict = None):
-    """params dict → query string (서명은 path만으로 계산)"""
     qs  = ("?" + urllib.parse.urlencode(params)) if params else ""
     url = BASE_URL + path + qs
     req = urllib.request.Request(url, headers=_headers(cid, lic, sec, path))
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             body = r.read().decode()
-            print(f"  GET {path} → {r.status}")
             return json.loads(body)
     except urllib.error.HTTPError as e:
         err = e.read().decode()
-        print(f"  ERROR {path} params={params} → HTTP {e.code}: {err[:400]}", file=sys.stderr)
+        print(f"  ERROR {path} → HTTP {e.code}: {err[:300]}", file=sys.stderr)
         raise
 
 
-# ── 통계: 단일 ID, 단일 호출 ──────────────────────────────────────────────────
-def probe_fields(cid, lic, sec, sample_id: str, date_from: str, date_to: str) -> str:
-    """사용 가능한 필드를 한 번만 확인하고 JSON 문자열로 반환"""
+# ── 유효 필드 탐색 (최초 1회) ─────────────────────────────────────────────────
+def probe_fields(cid, lic, sec, sample_id, date_from, date_to):
     since = date_from.replace("-", "")
     until = date_to.replace("-", "")
     tr = json.dumps({"since": since, "until": until}, separators=(",", ":"))
     valid = list(BASE_FIELDS)
-    for f in EXTRA_FIELDS:
+    for f in OPTIONAL_FIELDS:
         candidate = json.dumps(valid + [f], separators=(",", ":"))
         try:
             api_get(cid, lic, sec, "/stats",
@@ -71,60 +79,69 @@ def probe_fields(cid, lic, sec, sample_id: str, date_from: str, date_to: str) ->
             valid.append(f)
             print(f"  필드 {f} ✓")
         except Exception:
-            print(f"  필드 {f} ✗ (미지원, 제외)")
-    result = json.dumps(valid, separators=(",", ":"))
-    print(f"  최종 사용 필드: {valid}")
-    return result
+            print(f"  필드 {f} ✗")
+    print(f"  확정 필드: {valid}")
+    return json.dumps(valid, separators=(",", ":")), valid
 
 
-def get_stat_one(cid, lic, sec, obj_id: str, time_unit: str,
-                 date_from: str, date_to: str, active_fields: str):
-    """ID 하나에 대한 통계 반환"""
+# ── 통계 조회 ─────────────────────────────────────────────────────────────────
+def get_stats(cid, lic, sec, obj_id, time_unit, date_from, date_to, active_fields_json):
     since = date_from.replace("-", "")
     until = date_to.replace("-", "")
-
-    # ── 진단: 단계별로 파라미터를 늘려가며 어디서 400이 나는지 확인 ──
-    tr = json.dumps({"since": since, "until": until}, separators=(",", ":"))
-    params = {"ids": obj_id, "fields": active_fields, "timeUnit": time_unit, "timeRange": tr}
+    tr    = json.dumps({"since": since, "until": until}, separators=(",", ":"))
+    params = {"ids": obj_id, "fields": active_fields_json,
+              "timeUnit": time_unit, "timeRange": tr}
     resp = api_get(cid, lic, sec, "/stats", params)
-    return resp if isinstance(resp, list) else resp.get("data", [])
+    if isinstance(resp, list):
+        return resp
+    if isinstance(resp, dict) and "data" in resp:
+        return resp["data"]
+    # 단일 dict인 경우 리스트로 감쌈
+    if isinstance(resp, dict):
+        return [resp]
+    return []
 
 
-# ── 캠페인 목록 ───────────────────────────────────────────────────────────────
+# ── 목록 API ──────────────────────────────────────────────────────────────────
 def get_campaigns(cid, lic, sec):
     d = api_get(cid, lic, sec, "/ncc/campaigns")
     return d if isinstance(d, list) else d.get("campaigns", d.get("items", []))
 
 
-# ── 광고그룹 목록 ─────────────────────────────────────────────────────────────
 def get_adgroups(cid, lic, sec, campaign_id):
     d = api_get(cid, lic, sec, "/ncc/adgroups", {"nccCampaignId": campaign_id})
     return d if isinstance(d, list) else d.get("adGroups", d.get("items", []))
 
 
 # ── 일별 합산 ─────────────────────────────────────────────────────────────────
-def aggregate_daily(rows):
+def aggregate_daily(rows, valid_fields):
     by_date = {}
     for row in rows:
-        # API 응답이 flat 구조 → datetime / date / regTm 순으로 시도
+        s = row.get("stat") or row
+        # 날짜 필드 탐색
         raw_d = (row.get("datetime") or row.get("date") or
-                 row.get("regTm") or "")
-        d = str(raw_d)[:10].replace(".", "-")  # YYYYMMDD → YYYY-MM-DD 변환
-        if len(d) < 10 or not d[:4].isdigit():
+                 s.get("datetime") or s.get("date") or "")
+        d = str(raw_d)[:10]
+        if not d or len(d) < 8:
             continue
-        s = row.get("stat") or row  # flat or nested 모두 처리
+        # YYYYMMDD → YYYY-MM-DD
+        if len(d) == 8 and "-" not in d:
+            d = f"{d[:4]}-{d[4:6]}-{d[6:8]}"
+        if len(d) != 10:
+            continue
         e = by_date.setdefault(d, {"date": d, "cost": 0, "impressions": 0,
                                    "clicks": 0, "conversions": 0, "conversion_amount": 0})
         e["cost"]              += _int(s.get("salesAmt"))
         e["impressions"]       += _int(s.get("impCnt"))
         e["clicks"]            += _int(s.get("clkCnt"))
-        e["conversions"]       += _int(s.get("rvImpCnt"))
+        # 전환수: 여러 후보 필드 시도
+        e["conversions"]       += _int(s.get("rvImpCnt") or s.get("orderCnt") or s.get("convCnt"))
         e["conversion_amount"] += _int(s.get("convAmt"))
 
     result = sorted(by_date.values(), key=lambda x: x["date"])
     for r in result:
         r["ctr"]  = round(r["clicks"] / r["impressions"] * 100, 2) if r["impressions"] else 0
-        r["cpc"]  = round(r["cost"] / r["clicks"])                  if r["clicks"]      else 0
+        r["cpc"]  = round(r["cost"]   / r["clicks"])               if r["clicks"]      else 0
         r["roas"] = round(r["conversion_amount"] / r["cost"] * 100, 1) \
                     if r["cost"] and r["conversion_amount"] else None
     return result
@@ -135,6 +152,10 @@ def _int(v):
         return int(v or 0)
     except (TypeError, ValueError):
         return 0
+
+
+def _sum(rows, key):
+    return sum(_int(r.get(key)) for r in rows)
 
 
 # ── 메인 ──────────────────────────────────────────────────────────────────────
@@ -150,48 +171,52 @@ def main():
 
     # 1) 캠페인 목록
     campaigns = get_campaigns(customer_id, access_license, secret_key)
-    print(f"캠페인 총 {len(campaigns)}개")
+    print(f"캠페인 {len(campaigns)}개:")
     for c in campaigns:
-        print(f"  캠페인: {c.get('name','?')} | 타입: {c.get('campaignTp','?')} | ID: {c.get('nccCampaignId','?')}")
+        print(f"  {c.get('name','?')} | 타입: {c.get('campaignTp','?')}")
 
-    # 2) 유효 필드 한 번만 확인
-    print("사용 가능한 통계 필드 확인 중...")
+    # 2) 유효 필드 탐색
+    print("유효 필드 확인 중...")
     first_cid = campaigns[0]["nccCampaignId"]
-    active_fields = probe_fields(customer_id, access_license, secret_key,
-                                 first_cid, date_from, date_to)
+    active_json, valid_fields = probe_fields(
+        customer_id, access_license, secret_key, first_cid, date_from, date_to)
 
-    # 3) 캠페인별 일별 통계 수집 (1개씩)
+    # 3) 일별 통계 (날짜 디버그 포함)
     print("일별 통계 수집 중...")
     all_daily_rows = []
     for c in campaigns:
         cid_val = c["nccCampaignId"]
-        rows = get_stat_one(customer_id, access_license, secret_key,
-                            cid_val, "date", date_from, date_to, active_fields)
+        rows = get_stats(customer_id, access_license, secret_key,
+                         cid_val, "date", date_from, date_to, active_json)
         all_daily_rows.extend(rows)
-        print(f"  캠페인 {cid_val}: {len(rows)}행")
-        if rows and cid_val == campaigns[0]["nccCampaignId"]:
-            print(f"  [일별 첫행] {json.dumps(rows[0], ensure_ascii=False)[:300]}")
+        print(f"  {c.get('name','?')}: {len(rows)}행")
+        if rows and cid_val == first_cid:
+            print(f"  [첫행 키] {list(rows[0].keys())}")
+            print(f"  [첫행]   {json.dumps(rows[0], ensure_ascii=False)[:300]}")
 
-    daily_totals = aggregate_daily(all_daily_rows)
+    daily_totals = aggregate_daily(all_daily_rows, valid_fields)
     print(f"  → 일별 합산 {len(daily_totals)}일")
 
-    # 3) 광고그룹별 통계
+    # 4) 광고그룹별 통계 + 캠페인 타입 분류
     print("광고그룹 통계 수집 중...")
     adgroup_rows = []
 
     for c in campaigns:
-        cid_val = c["nccCampaignId"]
-        cname   = c.get("name", cid_val)   # API 필드명은 'name'
+        cid_val  = c["nccCampaignId"]
+        cname    = c.get("name", cid_val)
+        ctp_raw  = c.get("campaignTp", "")
+        ctype    = TYPE_MAP.get(ctp_raw, ctp_raw or "기타")
+
         adgroups = get_adgroups(customer_id, access_license, secret_key, cid_val)
         if not adgroups:
             continue
-        print(f"  [{cname}] 광고그룹 {len(adgroups)}개")
+        print(f"  [{ctype}] {cname}: 광고그룹 {len(adgroups)}개")
 
         for ag in adgroups:
             agid   = ag["nccAdgroupId"]
-            agname = ag.get("name", ag.get("adgroupName", agid))  # API 필드명은 'name'
-            rows   = get_stat_one(customer_id, access_license, secret_key,
-                                  agid, "total", date_from, date_to, active_fields)
+            agname = ag.get("name", ag.get("adgroupName", agid))
+            rows   = get_stats(customer_id, access_license, secret_key,
+                               agid, "total", date_from, date_to, active_json)
             s = {}
             if rows:
                 s = rows[0].get("stat") or rows[0]
@@ -199,9 +224,12 @@ def main():
             cost     = _int(s.get("salesAmt"))
             clicks   = _int(s.get("clkCnt"))
             imps     = _int(s.get("impCnt"))
-            convs    = 0   # rvImpCnt 미지원
+            # 전환수: 여러 후보 시도
+            convs    = _int(s.get("rvImpCnt") or s.get("orderCnt") or s.get("convCnt") or 0)
             conv_amt = _int(s.get("convAmt"))
+
             adgroup_rows.append({
+                "campaign_type":     ctype,
                 "campaign_name":     cname,
                 "adgroup_name":      agname,
                 "cost":              cost,
@@ -218,7 +246,7 @@ def main():
 
     adgroup_rows.sort(key=lambda x: x["cost"], reverse=True)
 
-    # 4) 전체 요약
+    # 5) 전체 요약
     tc = sum(r["cost"]              for r in adgroup_rows)
     ti = sum(r["impressions"]       for r in adgroup_rows)
     tk = sum(r["clicks"]            for r in adgroup_rows)
@@ -236,11 +264,33 @@ def main():
         "roas":              round(ta / tc * 100, 1) if tc and ta else None,
     }
 
+    # 6) 타입별 소계
+    types = sorted(set(r["campaign_type"] for r in adgroup_rows))
+    by_type = {}
+    for t in types:
+        rows_t = [r for r in adgroup_rows if r["campaign_type"] == t]
+        tc_t = sum(r["cost"]              for r in rows_t)
+        ti_t = sum(r["impressions"]       for r in rows_t)
+        tk_t = sum(r["clicks"]            for r in rows_t)
+        tv_t = sum(r["conversions"]       for r in rows_t)
+        ta_t = sum(r["conversion_amount"] for r in rows_t)
+        by_type[t] = {
+            "cost":              tc_t,
+            "impressions":       ti_t,
+            "clicks":            tk_t,
+            "ctr":               round(tk_t / ti_t * 100, 2) if ti_t else 0,
+            "cpc":               round(tc_t / tk_t)          if tk_t else 0,
+            "conversions":       tv_t,
+            "conversion_amount": ta_t,
+            "roas":              round(ta_t / tc_t * 100, 1) if tc_t and ta_t else None,
+        }
+
     output = {
         "fetched_at": now_kst,
         "date_from":  date_from,
         "date_to":    date_to,
         "summary":    summary,
+        "by_type":    by_type,
         "daily":      daily_totals,
         "ad_groups":  adgroup_rows,
     }
@@ -251,6 +301,8 @@ def main():
 
     print(f"=== 완료: 광고그룹 {len(adgroup_rows)}개 / 일별 {len(daily_totals)}일 ===")
     print(f"총 광고비 {tc:,}원 / 전환 {tv}건 / 전환액 {ta:,}원")
+    for t, s in by_type.items():
+        print(f"  [{t}] {s['cost']:,}원 / ROAS {s['roas']}%")
 
 
 if __name__ == "__main__":
