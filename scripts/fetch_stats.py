@@ -13,9 +13,10 @@ from datetime import datetime, timedelta, timezone
 BASE_URL = "https://api.naver.com"
 KST = timezone(timedelta(hours=9))
 
-# ctr, avgCpc는 API가 직접 제공하지 않는 파생값 → Python에서 계산
-FIELDS = json.dumps(["clkCnt", "impCnt", "salesAmt", "rvImpCnt", "convAmt"],
-                    separators=(",", ":"))
+# ctr, avgCpc, rvImpCnt는 API 미지원 → Python 계산 또는 제외
+# convAmt는 계정 설정에 따라 지원 여부 다름 → 런타임에 확인
+BASE_FIELDS  = ["clkCnt", "impCnt", "salesAmt"]
+EXTRA_FIELDS = ["convAmt"]          # 전환매출액 (계정 설정에 따라 가능)
 
 
 # ── 서명 ──────────────────────────────────────────────────────────────────────
@@ -55,32 +56,36 @@ def api_get(cid, lic, sec, path, params: dict = None):
 
 
 # ── 통계: 단일 ID, 단일 호출 ──────────────────────────────────────────────────
-def get_stat_one(cid, lic, sec, obj_id: str, time_unit: str, date_from: str, date_to: str):
+def probe_fields(cid, lic, sec, sample_id: str, date_from: str, date_to: str) -> str:
+    """사용 가능한 필드를 한 번만 확인하고 JSON 문자열로 반환"""
+    since = date_from.replace("-", "")
+    until = date_to.replace("-", "")
+    tr = json.dumps({"since": since, "until": until}, separators=(",", ":"))
+    valid = list(BASE_FIELDS)
+    for f in EXTRA_FIELDS:
+        candidate = json.dumps(valid + [f], separators=(",", ":"))
+        try:
+            api_get(cid, lic, sec, "/stats",
+                    {"ids": sample_id, "fields": candidate,
+                     "timeUnit": "total", "timeRange": tr})
+            valid.append(f)
+            print(f"  필드 {f} ✓")
+        except Exception:
+            print(f"  필드 {f} ✗ (미지원, 제외)")
+    result = json.dumps(valid, separators=(",", ":"))
+    print(f"  최종 사용 필드: {valid}")
+    return result
+
+
+def get_stat_one(cid, lic, sec, obj_id: str, time_unit: str,
+                 date_from: str, date_to: str, active_fields: str):
     """ID 하나에 대한 통계 반환"""
     since = date_from.replace("-", "")
     until = date_to.replace("-", "")
 
     # ── 진단: 단계별로 파라미터를 늘려가며 어디서 400이 나는지 확인 ──
     tr = json.dumps({"since": since, "until": until}, separators=(",", ":"))
-
-    # 필드 하나씩 유효성 확인 후 동적으로 조합
-    base = ["clkCnt", "salesAmt"]  # 작동 확인된 기본 필드
-    optional = ["impCnt", "rvImpCnt", "convAmt"]
-    valid = list(base)
-    for f in optional:
-        test_fields = json.dumps(valid + [f], separators=(",", ":"))
-        try:
-            api_get(cid, lic, sec, "/stats",
-                    {"ids": obj_id, "fields": test_fields,
-                     "timeUnit": "total", "timeRange": tr})
-            valid.append(f)
-            print(f"  [필드] {f} ✓")
-        except Exception:
-            print(f"  [필드] {f} ✗ (제외)")
-
-    final_fields = json.dumps(valid, separators=(",", ":"))
-    print(f"  [최종 필드] {valid}")
-    params = {"ids": obj_id, "fields": final_fields, "timeUnit": time_unit, "timeRange": tr}
+    params = {"ids": obj_id, "fields": active_fields, "timeUnit": time_unit, "timeRange": tr}
     resp = api_get(cid, lic, sec, "/stats", params)
     return resp if isinstance(resp, list) else resp.get("data", [])
 
@@ -144,13 +149,19 @@ def main():
     campaigns = get_campaigns(customer_id, access_license, secret_key)
     print(f"캠페인 {len(campaigns)}개")
 
-    # 2) 캠페인별 일별 통계 수집 (1개씩)
+    # 2) 유효 필드 한 번만 확인
+    print("사용 가능한 통계 필드 확인 중...")
+    first_cid = campaigns[0]["nccCampaignId"]
+    active_fields = probe_fields(customer_id, access_license, secret_key,
+                                 first_cid, date_from, date_to)
+
+    # 3) 캠페인별 일별 통계 수집 (1개씩)
     print("일별 통계 수집 중...")
     all_daily_rows = []
     for c in campaigns:
         cid_val = c["nccCampaignId"]
         rows = get_stat_one(customer_id, access_license, secret_key,
-                            cid_val, "date", date_from, date_to)
+                            cid_val, "date", date_from, date_to, active_fields)
         all_daily_rows.extend(rows)
         print(f"  캠페인 {cid_val}: {len(rows)}일")
 
@@ -173,7 +184,7 @@ def main():
             agid   = ag["nccAdgroupId"]
             agname = ag.get("adgroupName", agid)
             rows   = get_stat_one(customer_id, access_license, secret_key,
-                                  agid, "total", date_from, date_to)
+                                  agid, "total", date_from, date_to, active_fields)
             s = {}
             if rows:
                 s = rows[0].get("stat") or rows[0]
@@ -181,7 +192,7 @@ def main():
             cost     = _int(s.get("salesAmt"))
             clicks   = _int(s.get("clkCnt"))
             imps     = _int(s.get("impCnt"))
-            convs    = _int(s.get("rvImpCnt"))
+            convs    = 0   # rvImpCnt 미지원
             conv_amt = _int(s.get("convAmt"))
             adgroup_rows.append({
                 "campaign_name":     cname,
