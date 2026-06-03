@@ -62,7 +62,25 @@ def get_stat_one(cid, lic, sec, obj_id: str, time_unit: str, date_from: str, dat
 
     # ── 진단: 단계별로 파라미터를 늘려가며 어디서 400이 나는지 확인 ──
     tr = json.dumps({"since": since, "until": until}, separators=(",", ":"))
-    params = {"ids": obj_id, "fields": FIELDS, "timeUnit": time_unit, "timeRange": tr}
+
+    # 필드 하나씩 유효성 확인 후 동적으로 조합
+    base = ["clkCnt", "salesAmt"]  # 작동 확인된 기본 필드
+    optional = ["impCnt", "rvImpCnt", "convAmt"]
+    valid = list(base)
+    for f in optional:
+        test_fields = json.dumps(valid + [f], separators=(",", ":"))
+        try:
+            api_get(cid, lic, sec, "/stats",
+                    {"ids": obj_id, "fields": test_fields,
+                     "timeUnit": "total", "timeRange": tr})
+            valid.append(f)
+            print(f"  [필드] {f} ✓")
+        except Exception:
+            print(f"  [필드] {f} ✗ (제외)")
+
+    final_fields = json.dumps(valid, separators=(",", ":"))
+    print(f"  [최종 필드] {valid}")
+    params = {"ids": obj_id, "fields": final_fields, "timeUnit": time_unit, "timeRange": tr}
     resp = api_get(cid, lic, sec, "/stats", params)
     return resp if isinstance(resp, list) else resp.get("data", [])
 
