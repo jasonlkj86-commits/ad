@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>광고 성과 분석</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #222230;
+    --border: #2e2e3e;
+    --accent: #7c6af7;
+    --accent-dim: rgba(124,106,247,.15);
+    --text: #e8e8f0;
+    --text-muted: #7878a0;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -.3px; }
+  .logo span { color: var(--accent); }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .controls label { color: var(--text-muted); font-size: 12px; }
+  .date-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 7px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .date-input::-webkit-calendar-picker-indicator { filter: invert(.6); cursor: pointer; }
+  .sep { color: var(--text-muted); }
+  .btn-fetch {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn-fetch:hover { opacity: .85; }
+  .btn-fetch:disabled { opacity: .45; cursor: not-allowed; }
+
+  .status-badge {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+  .status-dot.loading { background: var(--yellow); animation: pulse 1s infinite; }
+  .status-dot.done { background: var(--green); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── Layout ── */
+  main { max-width: 1280px; margin: 0 auto; padding: 28px; display: flex; flex-direction: column; gap: 24px; }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 14px;
+  }
+
+  /* ── Summary Cards ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .card-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .card-value {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -.5px;
+    line-height: 1;
+  }
+  .card-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .card.highlight { border-color: var(--accent); background: linear-gradient(135deg, var(--surface) 60%, var(--accent-dim)); }
+  .card .roas-good { color: var(--green); }
+  .card .roas-bad  { color: var(--red); }
+
+  /* ── Chart ── */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+  #daily-chart { min-height: 260px; }
+
+  /* ── Table ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .table-search {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 6px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    width: 220px;
+  }
+  .table-search::placeholder { color: var(--text-muted); }
+  .table-search:focus { outline: none; border-color: var(--accent); }
+
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: right;
+    padding: 9px 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  thead th:first-child, thead th:nth-child(2) { text-align: left; }
+  thead th:hover { color: var(--text); }
+  thead th.sorted { color: var(--accent); }
+  thead th .sort-icon { margin-left: 4px; opacity: .5; }
+  thead th.sorted .sort-icon { opacity: 1; }
+
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  td { padding: 10px 12px; text-align: right; vertical-align: middle; }
+  td:first-child, td:nth-child(2) { text-align: left; }
+  td:first-child { color: var(--text-muted); font-size: 12px; }
+
+  .roas-cell { font-weight: 700; }
+  .roas-high  { color: var(--green); }
+  .roas-mid   { color: var(--yellow); }
+  .roas-low   { color: var(--red); }
+  .na { color: var(--text-muted); font-size: 12px; }
+
+  /* ── Insights ── */
+  .insights { display: flex; flex-direction: column; gap: 10px; }
+  .insight-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .insight-item.good  { border-left: 3px solid var(--green); }
+  .insight-item.bad   { border-left: 3px solid var(--red); }
+  .insight-item.warn  { border-left: 3px solid var(--yellow); }
+  .insight-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .insight-text strong { color: var(--text); font-weight: 600; }
+  .insight-text span   { color: var(--text-muted); }
+
+  /* ── Empty / Loading states ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; opacity: .5; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── Misc ── */
+  .fetched-info {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 0 4px;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 14px 16px; }
+    main   { padding: 16px; }
+    .card-value { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">AD <span>성과분석</span></div>
+  <div class="controls">
+    <label>기간</label>
+    <input type="date" id="date-from" class="date-input">
+    <span class="sep">→</span>
+    <input type="date" id="date-to" class="date-input">
+    <button class="btn-fetch" id="btn-fetch" onclick="triggerFetch()">조회하기</button>
+    <div class="status-badge" id="status-badge" style="display:none">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text"></span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ① 요약 카드 -->
+  <div>
+    <div class="section-title">기간 요약</div>
+    <div class="cards" id="summary-cards">
+      <div class="empty-state" style="grid-column:1/-1; padding:30px">
+        <div class="icon">📊</div>
+        <p>기간을 선택하고 조회하기를 눌러주세요</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 일별 추이 차트 -->
+  <div class="chart-card" id="chart-section" style="display:none">
+    <div class="section-title">일별 추이</div>
+    <div id="daily-chart"></div>
+  </div>
+
+  <!-- ③ 광고그룹별 성과 테이블 -->
+  <div class="table-card" id="table-section" style="display:none">
+    <div class="table-header">
+      <div class="section-title" style="margin:0">광고그룹별 성과</div>
+      <input type="text" class="table-search" id="table-search" placeholder="광고그룹명 검색..." oninput="filterTable()">
+    </div>
+    <div class="tbl-wrap">
+      <table id="adgroup-table">
+        <thead>
+          <tr>
+            <th onclick="sortTable('campaign_name')">캠페인 <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('adgroup_name')">광고그룹 <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('cost')">광고비 <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('clicks')">클릭수 <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('ctr')">CTR <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('cpc')">CPC <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('conversions')">전환 <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('conversion_amount')">전환액 <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('roas')">ROAS <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('cpa')">CPA <span class="sort-icon">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="adgroup-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ④ 인사이트 -->
+  <div id="insights-section" style="display:none">
+    <div class="section-title">인사이트</div>
+    <div class="insights" id="insights-list"></div>
+  </div>
+
+</main>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const GITHUB_OWNER = 'YOUR_GITHUB_USERNAME';
+const GITHUB_REPO  = 'AD';
+const GITHUB_PAT   = localStorage.getItem('gh_pat') || '';
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let allAdGroups = [];
+let sortKey = 'cost';
+let sortAsc  = false;
+let chartInstance = null;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date();
+  const d30   = new Date(today); d30.setDate(d30.getDate() - 30);
+  document.getElementById('date-from').value = fmt(d30);
+  document.getElementById('date-to').value   = fmt(today);
+
+  // 기존 데이터 먼저 표시, PAT 안내는 조회 버튼 눌렀을 때만
+  loadData();
+});
+
+function fmt(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+function promptPAT() {
+  const pat = prompt(
+    'GitHub Personal Access Token을 입력하세요.\n' +
+    '(repo 권한 필요 — 한 번만 입력하면 저장됩니다)'
+  );
+  if (pat) {
+    localStorage.setItem('gh_pat', pat);
+    location.reload();
+  }
+}
+
+// ── Fetch trigger ─────────────────────────────────────────────────────────────
+async function triggerFetch() {
+  const pat = localStorage.getItem('gh_pat');
+  if (!pat) return promptPAT();
+  if (GITHUB_OWNER === 'YOUR_GITHUB_USERNAME') {
+    alert('index.html의 GITHUB_OWNER를 본인 GitHub 사용자명으로 바꿔주세요.');
+    return;
+  }
+
+  const dateFrom = document.getElementById('date-from').value;
+  const dateTo   = document.getElementById('date-to').value;
+  if (!dateFrom || !dateTo) { alert('기간을 선택해주세요.'); return; }
+
+  setStatus('loading', 'Actions 실행 중...');
+  document.getElementById('btn-fetch').disabled = true;
+
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/fetch_stats.yml/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `token ${pat}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ref: 'main', inputs: { date_from: dateFrom, date_to: dateTo } }),
+      }
+    );
+
+    if (res.status === 204) {
+      setStatus('loading', '데이터 수집 중... (30~60초 소요)');
+      pollData(0);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+  } catch (e) {
+    setStatus('', '');
+    document.getElementById('btn-fetch').disabled = false;
+    alert('오류: ' + e.message);
+  }
+}
+
+async function pollData(attempt) {
+  if (attempt > 20) {
+    setStatus('', '');
+    document.getElementById('btn-fetch').disabled = false;
+    alert('시간 초과. 잠시 후 페이지를 새로고침해주세요.');
+    return;
+  }
+  await sleep(4000);
+  const data = await fetchStatsJson();
+  const prevFetchedAt = document.getElementById('summary-cards').dataset.fetchedAt;
+  if (data && data.fetched_at && data.fetched_at !== prevFetchedAt) {
+    renderAll(data);
+    setStatus('done', `${data.fetched_at.slice(0,16).replace('T',' ')} 조회됨`);
+    document.getElementById('btn-fetch').disabled = false;
+  } else {
+    pollData(attempt + 1);
+  }
+}
+
+// ── Load existing data ────────────────────────────────────────────────────────
+async function loadData() {
+  const data = await fetchStatsJson();
+  if (data && data.fetched_at) {
+    renderAll(data);
+    setStatus('done', `${data.fetched_at.slice(0,16).replace('T',' ')} 조회됨`);
+  }
+}
+
+async function fetchStatsJson() {
+  try {
+    const res = await fetch(`data/stats.json?t=${Date.now()}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderAll(data) {
+  document.getElementById('summary-cards').dataset.fetchedAt = data.fetched_at;
+  renderSummary(data.summary, data.date_from, data.date_to);
+  renderChart(data.daily);
+  allAdGroups = data.ad_groups || [];
+  renderTable();
+  renderInsights(data.summary, allAdGroups);
+}
+
+function renderSummary(s, dateFrom, dateTo) {
+  const roas = s.roas;
+  const roasClass = roas == null ? '' : roas >= 300 ? 'roas-good' : roas >= 100 ? '' : 'roas-bad';
+
+  document.getElementById('summary-cards').innerHTML = `
+    <div class="card highlight">
+      <div class="card-label">총 광고비</div>
+      <div class="card-value">${wonFmt(s.cost)}</div>
+      <div class="card-sub">${dateFrom} ~ ${dateTo}</div>
+    </div>
+    <div class="card highlight">
+      <div class="card-label">전환액</div>
+      <div class="card-value">${s.conversion_amount ? wonFmt(s.conversion_amount) : '<span class="na">-</span>'}</div>
+      <div class="card-sub">${s.conversions}건 전환</div>
+    </div>
+    <div class="card highlight">
+      <div class="card-label">ROAS</div>
+      <div class="card-value ${roasClass}">${roas != null ? roas.toFixed(0) + '%' : '<span class="na" style="font-size:14px">전환액 없음</span>'}</div>
+      <div class="card-sub">${roas != null ? (roas >= 300 ? '✅ 우수' : roas >= 100 ? '보통' : '⚠️ 주의') : ''}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">클릭수</div>
+      <div class="card-value">${numFmt(s.clicks)}</div>
+      <div class="card-sub">노출 ${numFmt(s.impressions)}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">CTR</div>
+      <div class="card-value">${s.ctr.toFixed(2)}%</div>
+      <div class="card-sub">클릭률</div>
+    </div>
+    <div class="card">
+      <div class="card-label">평균 CPC</div>
+      <div class="card-value">${wonFmt(s.cpc)}</div>
+      <div class="card-sub">클릭당 비용</div>
+    </div>
+  `;
+}
+
+function renderChart(daily) {
+  if (!daily || !daily.length) return;
+  document.getElementById('chart-section').style.display = '';
+
+  const days = ['일','월','화','수','목','금','토'];
+  const cats  = daily.map(d => {
+    const dow = days[new Date(d.date).getDay()];
+    return d.date.slice(5) + ' ' + dow;
+  });
+  const costs = daily.map(d => d.cost);
+  const convAmts = daily.map(d => d.conversion_amount);
+  const hasConv = convAmts.some(v => v > 0);
+
+  const series = [{ name: '광고비', type: 'bar', data: costs }];
+  if (hasConv) series.push({ name: '전환액', type: 'line', data: convAmts });
+
+  const opts = {
+    series,
+    chart: {
+      height: 320,
+      background: 'transparent',
+      toolbar: { show: false },
+      animations: { enabled: false },
+    },
+    theme: { mode: 'dark' },
+    colors: ['#7c6af7', '#34d399'],
+    stroke: { width: [0, 3], curve: 'smooth' },
+    fill: { opacity: [0.85, 1] },
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories: cats,
+      labels: {
+        rotate: -45,
+        rotateAlways: true,
+        style: { colors: '#7878a0', fontSize: '11px' },
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: hasConv
+      ? [
+          { labels: { formatter: v => wonFmt(v), style: { colors: '#7878a0' } } },
+          { opposite: true, labels: { formatter: v => wonFmt(v), style: { colors: '#34d399' } } },
+        ]
+      : [{ labels: { formatter: v => wonFmt(v), style: { colors: '#7878a0' } } }],
+    grid: { borderColor: '#2e2e3e', strokeDashArray: 3 },
+    tooltip: {
+      theme: 'dark',
+      y: { formatter: v => wonFmt(v) },
+    },
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
+    legend: { labels: { colors: '#e8e8f0' } },
+  };
+
+  if (chartInstance) { chartInstance.destroy(); }
+  chartInstance = new ApexCharts(document.getElementById('daily-chart'), opts);
+  chartInstance.render();
+}
+
+function renderTable() {
+  const query  = document.getElementById('table-search').value.toLowerCase();
+  const rows   = allAdGroups.filter(r =>
+    r.adgroup_name.toLowerCase().includes(query) ||
+    r.campaign_name.toLowerCase().includes(query)
+  );
+  rows.sort((a, b) => {
+    const av = a[sortKey] ?? -1;
+    const bv = b[sortKey] ?? -1;
+    if (typeof av === 'string') return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sortAsc ? av - bv : bv - av;
+  });
+
+  // Update sort indicators
+  document.querySelectorAll('thead th').forEach(th => th.classList.remove('sorted'));
+  document.querySelectorAll('thead th').forEach(th => {
+    const match = th.getAttribute('onclick')?.match(/'(\w+)'/);
+    if (match && match[1] === sortKey) th.classList.add('sorted');
+  });
+
+  const tbody = document.getElementById('adgroup-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text-muted)">결과 없음</td></tr>`;
+    document.getElementById('table-section').style.display = '';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const roasClass = r.roas == null ? '' : r.roas >= 300 ? 'roas-high' : r.roas >= 100 ? 'roas-mid' : 'roas-low';
+    const cname = r.campaign_name.replace('[쇼핑검색] ', '');
+    return `<tr>
+      <td>${cname}</td>
+      <td>${r.adgroup_name}</td>
+      <td>${compactWon(r.cost)}</td>
+      <td>${numFmt(r.clicks)}</td>
+      <td>${r.ctr.toFixed(2)}%</td>
+      <td>${compactWon(r.cpc)}</td>
+      <td>${numFmt(r.conversions)}</td>
+      <td>${r.conversion_amount ? compactWon(r.conversion_amount) : '<span class="na">-</span>'}</td>
+      <td class="roas-cell ${roasClass}">${r.roas != null ? r.roas.toFixed(0) + '%' : '<span class="na">-</span>'}</td>
+      <td>${r.cpa != null ? compactWon(r.cpa) : '<span class="na">-</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('table-section').style.display = '';
+}
+
+function renderInsights(summary, adGroups) {
+  const list = document.getElementById('insights-list');
+  const items = [];
+
+  if (!adGroups.length) { document.getElementById('insights-section').style.display = 'none'; return; }
+
+  // ROAS 총평
+  if (summary.roas != null) {
+    if (summary.roas >= 300) {
+      items.push({ type: 'good', icon: '✅', text: `전체 ROAS <strong>${summary.roas.toFixed(0)}%</strong> — 광고비 대비 전환이 양호합니다.` });
+    } else if (summary.roas < 100) {
+      items.push({ type: 'bad', icon: '🔴', text: `전체 ROAS <strong>${summary.roas.toFixed(0)}%</strong> — 광고비보다 전환액이 낮습니다. 비효율 광고그룹 점검이 필요합니다.` });
+    }
+  }
+
+  // 비용 집중도
+  const totalCost = adGroups.reduce((s, r) => s + r.cost, 0);
+  const sorted = [...adGroups].sort((a, b) => b.cost - a.cost);
+  const top2cost = sorted.slice(0, 2).reduce((s, r) => s + r.cost, 0);
+  const top2pct = totalCost ? Math.round(top2cost / totalCost * 100) : 0;
+  if (top2pct > 70 && sorted.length > 3) {
+    items.push({ type: 'warn', icon: '⚠️', text: `상위 2개 광고그룹(<strong>${sorted[0].adgroup_name}</strong>, <strong>${sorted[1]?.adgroup_name}</strong>)에 전체 광고비의 <strong>${top2pct}%</strong>가 집중되어 있습니다.` });
+  }
+
+  // ROAS 있는 그룹 분석
+  const withRoas = adGroups.filter(r => r.roas != null && r.cost > 0);
+  if (withRoas.length) {
+    const best  = [...withRoas].sort((a, b) => b.roas - a.roas)[0];
+    const worst = [...withRoas].sort((a, b) => a.roas - b.roas)[0];
+    if (best.roas >= 200) {
+      items.push({ type: 'good', icon: '🟢', text: `ROAS 최고: <strong>${best.adgroup_name}</strong> (<strong>${best.roas.toFixed(0)}%</strong>) — 예산 증액을 검토하세요.` });
+    }
+    if (worst.roas < 100 && worst.cost > totalCost * 0.05) {
+      items.push({ type: 'bad', icon: '🔴', text: `ROAS 최저: <strong>${worst.adgroup_name}</strong> (<strong>${worst.roas.toFixed(0)}%</strong>) — 광고비 대비 전환이 낮습니다. 입찰가 조정 또는 일시 중지를 고려하세요.` });
+    }
+  }
+
+  // 클릭 없이 비용 쓰는 그룹
+  const noClick = adGroups.filter(r => r.cost > 0 && r.clicks === 0);
+  if (noClick.length) {
+    items.push({ type: 'warn', icon: '⚠️', text: `클릭 없이 비용이 발생한 광고그룹 <strong>${noClick.length}개</strong> — ${noClick.slice(0,3).map(r => r.adgroup_name).join(', ')} 등. 소재 및 키워드를 점검하세요.` });
+  }
+
+  // 전환 0인 고비용 그룹
+  const highCostNoConv = adGroups.filter(r => r.conversions === 0 && r.cost > totalCost * 0.1);
+  if (highCostNoConv.length) {
+    items.push({ type: 'bad', icon: '📉', text: `광고비 상위인데 전환 0건: <strong>${highCostNoConv.map(r => r.adgroup_name).join(', ')}</strong> — 랜딩페이지 또는 키워드 관련성을 확인하세요.` });
+  }
+
+  if (!items.length) {
+    items.push({ type: '', icon: 'ℹ️', text: `<span>충분한 데이터가 쌓이면 인사이트가 자동으로 표시됩니다.</span>` });
+  }
+
+  list.innerHTML = items.map(i => `
+    <div class="insight-item ${i.type}">
+      <span class="insight-icon">${i.icon}</span>
+      <div class="insight-text">${i.text}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('insights-section').style.display = '';
+}
+
+// ── Table interactions ────────────────────────────────────────────────────────
+function sortTable(key) {
+  if (sortKey === key) { sortAsc = !sortAsc; }
+  else { sortKey = key; sortAsc = false; }
+  renderTable();
+}
+
+function filterTable() { renderTable(); }
+
+// ── Status ────────────────────────────────────────────────────────────────────
+function setStatus(state, text) {
+  const badge = document.getElementById('status-badge');
+  const dot   = document.getElementById('status-dot');
+  const span  = document.getElementById('status-text');
+  if (!text) { badge.style.display = 'none'; return; }
+  badge.style.display = 'flex';
+  dot.className = 'status-dot ' + state;
+  span.textContent = text;
+}
+
+// ── Formatters ────────────────────────────────────────────────────────────────
+function wonFmt(v) {
+  if (v == null || v === 0) return '0원';
+  if (v >= 1000000) return (v / 1000000).toFixed(1) + '백만원';
+  return v.toLocaleString('ko-KR') + '원';
+}
+// 테이블용 압축 포맷
+function compactWon(v) {
+  if (v == null || v === 0) return '0원';
+  if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M';
+  if (v >= 10000)   return Math.round(v / 1000) + 'K';
+  return v.toLocaleString('ko-KR') + '원';
+}
+function numFmt(v) { return (v ?? 0).toLocaleString('ko-KR'); }
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
