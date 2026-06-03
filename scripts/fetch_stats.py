@@ -148,6 +148,9 @@ def main():
     # 1) 캠페인 목록
     campaigns = get_campaigns(customer_id, access_license, secret_key)
     print(f"캠페인 {len(campaigns)}개")
+    # 첫 캠페인 구조 출력 (필드명 확인용)
+    if campaigns:
+        print(f"  [캠페인 샘플 키] {list(campaigns[0].keys())}")
 
     # 2) 유효 필드 한 번만 확인
     print("사용 가능한 통계 필드 확인 중...")
@@ -163,7 +166,12 @@ def main():
         rows = get_stat_one(customer_id, access_license, secret_key,
                             cid_val, "date", date_from, date_to, active_fields)
         all_daily_rows.extend(rows)
-        print(f"  캠페인 {cid_val}: {len(rows)}일")
+        print(f"  캠페인 {cid_val}: {len(rows)}행")
+        # 첫 캠페인 첫 행 구조 출력
+        if rows and cid_val == campaigns[0]["nccCampaignId"]:
+            print(f"  [일별 샘플 키] {list(rows[0].keys())}")
+            if rows[0]:
+                print(f"  [일별 샘플] {json.dumps(rows[0], ensure_ascii=False)[:200]}")
 
     daily_totals = aggregate_daily(all_daily_rows)
     print(f"  → 일별 합산 {len(daily_totals)}일")
