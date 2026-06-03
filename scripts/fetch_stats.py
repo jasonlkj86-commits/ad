@@ -60,51 +60,37 @@ def get_stat_one(cid, lic, sec, obj_id: str, time_unit: str, date_from: str, dat
     until = date_to.replace("-", "")
 
     # ── 진단: 단계별로 파라미터를 늘려가며 어디서 400이 나는지 확인 ──
-    tests = [
-        # 1) 최소 파라미터 (datePreset 사용)
-        {"ids": obj_id, "fields": '["clkCnt","salesAmt"]',
-         "timeUnit": "total", "datePreset": "last7days"},
-        # 2) timeRange (YYYYMMDD)
-        {"ids": obj_id, "fields": '["clkCnt","salesAmt"]',
-         "timeUnit": time_unit,
-         "timeRange": json.dumps({"since": since, "until": until}, separators=(",", ":"))},
-        # 3) timeRange (YYYY-MM-DD)
-        {"ids": obj_id, "fields": '["clkCnt","salesAmt"]',
-         "timeUnit": time_unit,
-         "timeRange": json.dumps({"since": date_from, "until": date_to}, separators=(",", ":"))},
-        # 4) 전체 필드 + datePreset
-        {"ids": obj_id, "fields": FIELDS,
-         "timeUnit": "total", "datePreset": "last7days"},
+    tr = json.dumps({"since": since, "until": until}, separators=(",", ":"))
+
+    # 필드 후보별 테스트 (어느 필드가 문제인지 특정)
+    field_candidates = [
+        ["clkCnt", "impCnt", "salesAmt", "ctr", "avgCpc"],          # 변환 제외
+        ["clkCnt", "salesAmt", "convAmt"],                           # convAmt 단독
+        ["clkCnt", "salesAmt", "rvImpCnt"],                          # rvImpCnt 단독
+        ["clkCnt", "impCnt", "salesAmt", "ctr", "avgCpc", "convAmt"],# rvImpCnt 제외
+        ["clkCnt", "impCnt", "salesAmt", "ctr", "avgCpc", "rvImpCnt"],# convAmt 제외
+        ["clkCnt", "impCnt", "salesAmt", "ctr", "avgCpc", "rvImpCnt", "convAmt"],  # 전체
     ]
-    for i, params in enumerate(tests):
-        print(f"  [진단 {i+1}] params={params}")
+
+    working_fields = None
+    for candidate in field_candidates:
+        f = json.dumps(candidate, separators=(",", ":"))
+        params = {"ids": obj_id, "fields": f, "timeUnit": time_unit, "timeRange": tr}
+        print(f"  [필드테스트] {candidate}")
         try:
             resp = api_get(cid, lic, sec, "/stats", params)
-            print(f"  [진단 {i+1}] 성공!")
-            # 성공한 형식으로 실제 파라미터 구성
-            if i in (0, 3):  # datePreset 방식
-                final_params = {
-                    "ids": obj_id, "fields": FIELDS,
-                    "timeUnit": time_unit, "datePreset": "last7days"
-                }
-            elif i == 1:  # timeRange YYYYMMDD
-                final_params = {
-                    "ids": obj_id, "fields": FIELDS,
-                    "timeUnit": time_unit,
-                    "timeRange": json.dumps({"since": since, "until": until}, separators=(",", ":"))
-                }
-            else:  # timeRange YYYY-MM-DD
-                final_params = {
-                    "ids": obj_id, "fields": FIELDS,
-                    "timeUnit": time_unit,
-                    "timeRange": json.dumps({"since": date_from, "until": date_to}, separators=(",", ":"))
-                }
-            resp2 = api_get(cid, lic, sec, "/stats", final_params)
-            return resp2 if isinstance(resp2, list) else resp2.get("data", [])
+            print(f"  [필드테스트] 성공! → {candidate}")
+            working_fields = f
+            break
         except Exception:
             continue
 
-    raise RuntimeError(f"모든 파라미터 조합 실패. obj_id={obj_id}")
+    if not working_fields:
+        raise RuntimeError(f"유효한 필드 조합 없음. obj_id={obj_id}")
+
+    params = {"ids": obj_id, "fields": working_fields, "timeUnit": time_unit, "timeRange": tr}
+    resp = api_get(cid, lic, sec, "/stats", params)
+    return resp if isinstance(resp, list) else resp.get("data", [])
 
 
 # ── 캠페인 목록 ───────────────────────────────────────────────────────────────
