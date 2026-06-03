@@ -15,6 +15,7 @@ KST = timezone(timedelta(hours=9))
 
 # 캠페인 타입 한글 매핑
 TYPE_MAP = {
+    "WEB_SITE":        "파워링크",   # 실제 API 값
     "POWERLINK":       "파워링크",
     "POWER_LINK":      "파워링크",
     "SHOPPING":        "쇼핑검색",
@@ -181,18 +182,22 @@ def main():
     active_json, valid_fields = probe_fields(
         customer_id, access_license, secret_key, first_cid, date_from, date_to)
 
-    # 3) 일별 통계 (날짜 디버그 포함)
-    print("일별 통계 수집 중...")
+    # 3) 일별 통계 — 광고그룹 레벨로 수집 (캠페인 레벨은 datetime 없음)
+    print("일별 통계 수집 중 (광고그룹 레벨)...")
     all_daily_rows = []
+    first_ag_done = False
     for c in campaigns:
-        cid_val = c["nccCampaignId"]
-        rows = get_stats(customer_id, access_license, secret_key,
-                         cid_val, "date", date_from, date_to, active_json)
-        all_daily_rows.extend(rows)
-        print(f"  {c.get('name','?')}: {len(rows)}행")
-        if rows and cid_val == first_cid:
-            print(f"  [첫행 키] {list(rows[0].keys())}")
-            print(f"  [첫행]   {json.dumps(rows[0], ensure_ascii=False)[:300]}")
+        cid_val  = c["nccCampaignId"]
+        adgs = get_adgroups(customer_id, access_license, secret_key, cid_val)
+        for ag in adgs:
+            agid = ag["nccAdgroupId"]
+            rows = get_stats(customer_id, access_license, secret_key,
+                             agid, "date", date_from, date_to, active_json)
+            all_daily_rows.extend(rows)
+            if not first_ag_done and rows:
+                first_ag_done = True
+                print(f"  [첫 광고그룹 첫행 키] {list(rows[0].keys())}")
+                print(f"  [첫 광고그룹 첫행]   {json.dumps(rows[0], ensure_ascii=False)[:300]}")
 
     daily_totals = aggregate_daily(all_daily_rows, valid_fields)
     print(f"  → 일별 합산 {len(daily_totals)}일")
