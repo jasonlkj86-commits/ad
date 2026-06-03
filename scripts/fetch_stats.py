@@ -13,7 +13,8 @@ from datetime import datetime, timedelta, timezone
 BASE_URL = "https://api.naver.com"
 KST = timezone(timedelta(hours=9))
 
-FIELDS = json.dumps(["clkCnt", "impCnt", "salesAmt", "ctr", "avgCpc", "rvImpCnt", "convAmt"],
+# ctr, avgCpc는 API가 직접 제공하지 않는 파생값 → Python에서 계산
+FIELDS = json.dumps(["clkCnt", "impCnt", "salesAmt", "rvImpCnt", "convAmt"],
                     separators=(",", ":"))
 
 
@@ -61,34 +62,7 @@ def get_stat_one(cid, lic, sec, obj_id: str, time_unit: str, date_from: str, dat
 
     # ── 진단: 단계별로 파라미터를 늘려가며 어디서 400이 나는지 확인 ──
     tr = json.dumps({"since": since, "until": until}, separators=(",", ":"))
-
-    # 필드 후보별 테스트 (어느 필드가 문제인지 특정)
-    field_candidates = [
-        ["clkCnt", "impCnt", "salesAmt", "ctr", "avgCpc"],          # 변환 제외
-        ["clkCnt", "salesAmt", "convAmt"],                           # convAmt 단독
-        ["clkCnt", "salesAmt", "rvImpCnt"],                          # rvImpCnt 단독
-        ["clkCnt", "impCnt", "salesAmt", "ctr", "avgCpc", "convAmt"],# rvImpCnt 제외
-        ["clkCnt", "impCnt", "salesAmt", "ctr", "avgCpc", "rvImpCnt"],# convAmt 제외
-        ["clkCnt", "impCnt", "salesAmt", "ctr", "avgCpc", "rvImpCnt", "convAmt"],  # 전체
-    ]
-
-    working_fields = None
-    for candidate in field_candidates:
-        f = json.dumps(candidate, separators=(",", ":"))
-        params = {"ids": obj_id, "fields": f, "timeUnit": time_unit, "timeRange": tr}
-        print(f"  [필드테스트] {candidate}")
-        try:
-            resp = api_get(cid, lic, sec, "/stats", params)
-            print(f"  [필드테스트] 성공! → {candidate}")
-            working_fields = f
-            break
-        except Exception:
-            continue
-
-    if not working_fields:
-        raise RuntimeError(f"유효한 필드 조합 없음. obj_id={obj_id}")
-
-    params = {"ids": obj_id, "fields": working_fields, "timeUnit": time_unit, "timeRange": tr}
+    params = {"ids": obj_id, "fields": FIELDS, "timeUnit": time_unit, "timeRange": tr}
     resp = api_get(cid, lic, sec, "/stats", params)
     return resp if isinstance(resp, list) else resp.get("data", [])
 
