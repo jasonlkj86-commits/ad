@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-06-03T15:10:24+09:00",
+  "fetched_at": "2026-06-03T15:32:13+09:00",
   "date_from": "2026-05-04",
   "date_to": "2026-06-03",
   "summary": {
@@ -12,9 +12,42 @@
     "conversion_amount": 27797540,
     "roas": 2452.4
   },
+  "by_type": {
+    "WEB_SITE": {
+      "cost": 843633,
+      "impressions": 34263,
+      "clicks": 960,
+      "ctr": 2.8,
+      "cpc": 879,
+      "conversions": 0,
+      "conversion_amount": 17773940,
+      "roas": 2106.8
+    },
+    "쇼핑검색": {
+      "cost": 288933,
+      "impressions": 124461,
+      "clicks": 359,
+      "ctr": 0.29,
+      "cpc": 805,
+      "conversions": 0,
+      "conversion_amount": 10023600,
+      "roas": 3469.2
+    },
+    "플레이스": {
+      "cost": 909,
+      "impressions": 36,
+      "clicks": 5,
+      "ctr": 13.89,
+      "cpc": 182,
+      "conversions": 0,
+      "conversion_amount": 0,
+      "roas": null
+    }
+  },
   "daily": [],
   "ad_groups": [
     {
+      "campaign_type": "WEB_SITE",
       "campaign_name": "[파워링크] 미니멀사인",
       "adgroup_name": "01.메인키워드",
       "cost": 543969,
@@ -28,6 +61,7 @@
       "roas": 2886.5
     },
     {
+      "campaign_type": "WEB_SITE",
       "campaign_name": "[파워링크] 미니멀사인",
       "adgroup_name": "02.서브키워드",
       "cost": 211538,
@@ -41,6 +75,7 @@
       "roas": 979.7
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 현판",
       "adgroup_name": "01.미니간판_main",
       "cost": 116576,
@@ -54,6 +89,7 @@
       "roas": 4088.3
     },
     {
+      "campaign_type": "WEB_SITE",
       "campaign_name": "[파워링크] 미광사홈페이지",
       "adgroup_name": "11_미광사_지역키워드_1",
       "cost": 81023,
@@ -67,6 +103,7 @@
       "roas": null
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 현판",
       "adgroup_name": "05.건물번호판(도로명 등)",
       "cost": 42083,
@@ -80,6 +117,7 @@
       "roas": null
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 현판",
       "adgroup_name": "04.절곡현판",
       "cost": 24950,
@@ -93,6 +131,7 @@
       "roas": 3771.5
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 현판",
       "adgroup_name": "00.브랜드(벌크)",
       "cost": 24891,
@@ -106,6 +145,7 @@
       "roas": 6688.8
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 현판",
       "adgroup_name": "02.미니간판_sub",
       "cost": 22623,
@@ -119,6 +159,7 @@
       "roas": 750.6
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 현판",
       "adgroup_name": "03.포맥스간판",
       "cost": 21041,
@@ -132,6 +173,7 @@
       "roas": 9315.1
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 삐뚤즈",
       "adgroup_name": "삐뚤즈_메인",
       "cost": 19437,
@@ -145,6 +187,7 @@
       "roas": 653.4
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 미니멜로",
       "adgroup_name": "03.미니멜로 발도장",
       "cost": 14149,
@@ -158,6 +201,7 @@
       "roas": 491.9
     },
     {
+      "campaign_type": "WEB_SITE",
       "campaign_name": "[파워링크] 미광사홈페이지",
       "adgroup_name": "10_미광사_성남지역만",
       "cost": 5940,
@@ -171,6 +215,7 @@
       "roas": null
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 미니멜로",
       "adgroup_name": "02.주차번호판_sub",
       "cost": 1477,
@@ -184,6 +229,7 @@
       "roas": null
     },
     {
+      "campaign_type": "플레이스",
       "campaign_name": "플레이스#1 미광사간판 홈페이지",
       "adgroup_name": "플레이스#1 미광사간판 홈페이지_광고그룹#1",
       "cost": 909,
@@ -197,6 +243,7 @@
       "roas": null
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 현판",
       "adgroup_name": "07.약력현판 준공표지판",
       "cost": 798,
@@ -210,6 +257,7 @@
       "roas": 28797.0
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 미니멜로",
       "adgroup_name": "01.주차번호판_main",
       "cost": 696,
@@ -223,6 +271,7 @@
       "roas": 13721.3
     },
     {
+      "campaign_type": "WEB_SITE",
       "campaign_name": "[파워링크] 미광사홈페이지",
       "adgroup_name": "01_미광사인",
       "cost": 392,
@@ -236,6 +285,7 @@
       "roas": null
     },
     {
+      "campaign_type": "WEB_SITE",
       "campaign_name": "[파워링크] 미광사홈페이지",
       "adgroup_name": "02_미광사인_전국",
       "cost": 295,
@@ -249,6 +299,7 @@
       "roas": null
     },
     {
+      "campaign_type": "WEB_SITE",
       "campaign_name": "[파워링크] 미광사홈페이지",
       "adgroup_name": "12_미광사_지역키워드_2",
       "cost": 240,
@@ -262,6 +313,7 @@
       "roas": null
     },
     {
+      "campaign_type": "WEB_SITE",
       "campaign_name": "[파워링크] 미광사홈페이지",
       "adgroup_name": "03_미광사인_전국1",
       "cost": 236,
@@ -275,6 +327,7 @@
       "roas": null
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 현판",
       "adgroup_name": "99.브랜드",
       "cost": 212,
@@ -288,6 +341,7 @@
       "roas": null
     },
     {
+      "campaign_type": "WEB_SITE",
       "campaign_name": "[파워링크] 미광사홈페이지",
       "adgroup_name": "04_미광사인_전국2",
       "cost": 0,
@@ -301,6 +355,7 @@
       "roas": null
     },
     {
+      "campaign_type": "쇼핑검색",
       "campaign_name": "[쇼핑검색] 현판",
       "adgroup_name": "06.그외(표찰 등)",
       "cost": 0,
